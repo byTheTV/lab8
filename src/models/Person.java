@@ -1,0 +1,75 @@
+package models;
+
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+
+public class Person implements Comparable<Person> {
+   
+    private String name; // Поле не может быть null, Строка не может быть пустой
+    private LocalDate birthday; // Поле может быть null
+    private String passportID; // Значение этого поля должно быть уникальным, Длина строки не должна быть больше 26, Строка не может быть пустой, Поле может быть null
+    private Color eyeColor; // Поле не может быть null
+    private Location location; // Поле не может быть null
+
+    private static Set<String> usedPassportIDs = new HashSet<>();
+
+    public Person() {}
+
+    public Person(String name, LocalDate birthday, String passportID, 
+                 Color eyeColor, Location location) {
+        setName(name);
+        this.birthday = birthday;
+        setPassportID(passportID);
+        setEyeColor(eyeColor);
+        setLocation(location);
+    }
+
+    public void setName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be null or empty");
+        }
+        this.name = name;
+    }
+
+    public void setBirthday(LocalDate birthday) {
+        this.birthday = birthday;
+    }
+
+    public void setPassportID(String passportID) {
+        if (passportID != null) {
+            if (passportID.trim().isEmpty()) {
+                throw new IllegalArgumentException("Passport ID cannot be empty if provided");
+            }
+            if (passportID.length() > 26) {
+                throw new IllegalArgumentException("Passport ID length cannot exceed 26 characters");
+            }
+        }
+        this.passportID = passportID;
+    }
+
+    public void setEyeColor(Color eyeColor) {
+        if (eyeColor == null) {
+            throw new IllegalArgumentException("Eye color cannot be null");
+        }
+        this.eyeColor = eyeColor;
+    }
+
+    public void setLocation(Location location) {
+        if (location == null) {
+            throw new IllegalArgumentException("Location cannot be null");
+        }
+        this.location = location;
+    }
+
+    public String getName() { return name; }
+    public LocalDate getBirthday() { return birthday; }
+    public String getPassportID() { return passportID; }
+    public Color getEyeColor() { return eyeColor; }
+    public Location getLocation() { return location; }
+
+    @Override
+    public int compareTo(Person other) {
+        return this.name.compareTo(other.name);
+    }
+}
