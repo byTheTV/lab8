@@ -200,4 +200,11 @@ public class StudyGroupCollectionManager {
         }
         return sb.toString();
     }
+
+    public StudyGroup getById(Long id) {
+        return collection.stream()
+                .filter(group -> group.getId().equals(id.intValue()))
+                .findFirst()
+                .orElse(null);
+    }
 } 

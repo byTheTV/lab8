@@ -1,3 +1,4 @@
+info
 add
 TestGroup1
 100
@@ -8,7 +9,7 @@ TestGroup1
 1
 Ivan
 2020-01-01
-
+20200112020011
 1
 183
 75

@@ -1,17 +1,18 @@
 package commandManagers.commands;
 
-import collectionManagers.StudyGroupCollectionManager;
 import commandManagers.Command;
-import java.time.LocalDate;
-import java.util.Scanner;
+import commandManagers.CommandManager;
+import commandManagers.CommandMode;
+import collectionManagers.StudyGroupCollectionManager;
 import models.*;
+import java.time.LocalDate;
 
 public class UpdateId extends Command {
-    private final Scanner scanner;
+    private final CommandManager commandManager;
 
-    public UpdateId(StudyGroupCollectionManager collectionManager, Scanner scanner) {
+    public UpdateId(StudyGroupCollectionManager collectionManager, CommandManager commandManager) {
         super(true, collectionManager);
-        this.scanner = scanner;
+        this.commandManager = commandManager;
     }
 
     @Override
@@ -21,41 +22,48 @@ public class UpdateId extends Command {
 
     @Override
     public String getDescr() {
-        return "обновить значение элемента коллекции, id которого равен заданному";
+        return "обновить значение элемента коллекции по id";
     }
 
     @Override
     public void execute() {
         try {
-            int id = Integer.parseInt(argument);
-            StudyGroup studyGroup = new StudyGroup();
-            
-            System.out.print("Введите название группы > ");
-            studyGroup.setName(scanner.nextLine().trim());
-            
-            studyGroup.setCoordinates(readCoordinates());
-            studyGroup.setStudentsCount(readStudentsCount());
-            studyGroup.setExpelledStudents(readExpelledStudents());
-            studyGroup.setTransferredStudents(readTransferredStudents());
-            studyGroup.setFormOfEducation(readFormOfEducation());
-            studyGroup.setGroupAdmin(readGroupAdmin());
-
-            if (collectionManager.updateById(id, studyGroup)) {
-                System.out.println("Элемент успешно обновлен");
-            } else {
-                System.out.println("Элемент с указанным id не найден");
+            Long id = Long.parseLong((String) argument);
+            StudyGroup oldGroup = collectionManager.getById(id);
+            if (oldGroup == null) {
+                System.out.println("Элемент с таким id не найден");
+                return;
             }
-        } catch (NumberFormatException e) {
-            System.out.println("Ошибка: id должен быть числом");
+
+            StudyGroup newGroup = new StudyGroup();
+            newGroup.setId(oldGroup.getId());
+            
+            if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                System.out.print("Введите название группы > ");
+            }
+            newGroup.setName(commandManager.getScanner().nextLine().trim());
+            
+            newGroup.setCoordinates(readCoordinates());
+            newGroup.setStudentsCount(readStudentsCount());
+            newGroup.setExpelledStudents(readExpelledStudents());
+            newGroup.setTransferredStudents(readTransferredStudents());
+            newGroup.setFormOfEducation(readFormOfEducation());
+            newGroup.setGroupAdmin(readGroupAdmin());
+
+            collectionManager.updateById(id.intValue(), newGroup);
+            System.out.println("Элемент успешно обновлен");
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
+            if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                execute();
+            }
         }
     }
 
     @Override
     public boolean checkArgument(Object argument) {
         try {
-            Integer.parseInt((String) argument);
+            Long.parseLong((String) argument);
             return true;
         } catch (NumberFormatException | ClassCastException e) {
             return false;
@@ -65,17 +73,23 @@ public class UpdateId extends Command {
     private Coordinates readCoordinates() {
         while (true) {
             try {
-                System.out.print("Введите координату X (максимальное значение 648) > ");
-                Long x = Long.parseLong(scanner.nextLine().trim());
+                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                    System.out.print("Введите координату X (максимальное значение 648) > ");
+                }
+                Long x = Long.parseLong(commandManager.getScanner().nextLine().trim());
                 
-                System.out.print("Введите координату Y > ");
-                Long y = Long.parseLong(scanner.nextLine().trim());
+                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                    System.out.print("Введите координату Y > ");
+                }
+                Long y = Long.parseLong(commandManager.getScanner().nextLine().trim());
                 
                 return new Coordinates(x, y);
             } catch (NumberFormatException e) {
-                System.out.println("Ошибка! Введите корректные числа");
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
+                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                    System.out.println("Ошибка! Введите корректные числа");
+                    continue;
+                }
+                throw e;
             }
         }
     }
@@ -84,7 +98,7 @@ public class UpdateId extends Command {
         while (true) {
             try {
                 System.out.print("Введите количество студентов > ");
-                long count = Long.parseLong(scanner.nextLine().trim());
+                long count = Long.parseLong(commandManager.getScanner().nextLine().trim());
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -99,7 +113,7 @@ public class UpdateId extends Command {
         while (true) {
             try {
                 System.out.print("Введите количество отчисленных студентов > ");
-                int count = Integer.parseInt(scanner.nextLine().trim());
+                int count = Integer.parseInt(commandManager.getScanner().nextLine().trim());
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -114,7 +128,7 @@ public class UpdateId extends Command {
         while (true) {
             try {
                 System.out.print("Введите количество переведенных студентов > ");
-                int count = Integer.parseInt(scanner.nextLine().trim());
+                int count = Integer.parseInt(commandManager.getScanner().nextLine().trim());
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -134,7 +148,7 @@ public class UpdateId extends Command {
                 }
                 System.out.print("> ");
                 
-                String input = scanner.nextLine().trim();
+                String input = commandManager.getScanner().nextLine().trim();
                 int choice = Integer.parseInt(input);
                 if (choice > 0 && choice <= FormOfEducation.values().length) {
                     return FormOfEducation.values()[choice - 1];
@@ -151,16 +165,16 @@ public class UpdateId extends Command {
             Person admin = new Person();
             
             System.out.print("Введите имя администратора > ");
-            admin.setName(scanner.nextLine().trim());
+            admin.setName(commandManager.getScanner().nextLine().trim());
             
             System.out.println("Введите дату рождения (в формате YYYY-MM-DD или пустую строку) > ");
-            String birthdayStr = scanner.nextLine().trim();
+            String birthdayStr = commandManager.getScanner().nextLine().trim();
             if (!birthdayStr.isEmpty()) {
                 admin.setBirthday(LocalDate.parse(birthdayStr));
             }
             
             System.out.println("Введите номер паспорта (не более 26 символов или пустую строку) > ");
-            String passportID = scanner.nextLine().trim();
+            String passportID = commandManager.getScanner().nextLine().trim();
             if (!passportID.isEmpty()) {
                 admin.setPassportID(passportID);
             }
@@ -184,7 +198,7 @@ public class UpdateId extends Command {
                 }
                 System.out.print("> ");
                 
-                String input = scanner.nextLine().trim();
+                String input = commandManager.getScanner().nextLine().trim();
                 int choice = Integer.parseInt(input);
                 if (choice > 0 && choice <= Color.values().length) {
                     return Color.values()[choice - 1];
@@ -200,13 +214,13 @@ public class UpdateId extends Command {
         while (true) {
             try {
                 System.out.print("Введите координату X локации > ");
-                Float x = Float.parseFloat(scanner.nextLine().trim());
+                Float x = Float.parseFloat(commandManager.getScanner().nextLine().trim());
                 
                 System.out.print("Введите координату Y локации > ");
-                Float y = Float.parseFloat(scanner.nextLine().trim());
+                Float y = Float.parseFloat(commandManager.getScanner().nextLine().trim());
                 
                 System.out.print("Введите координату Z локации > ");
-                Float z = Float.parseFloat(scanner.nextLine().trim());
+                Float z = Float.parseFloat(commandManager.getScanner().nextLine().trim());
                 
                 return new Location(x, y, z);
             } catch (NumberFormatException e) {

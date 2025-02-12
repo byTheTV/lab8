@@ -2,6 +2,7 @@ package commandManagers.commands;
 
 import commandManagers.Command;
 import commandManagers.CommandManager;
+import commandManagers.CommandMode;
 import exceptions.RecursiveScriptException;
 
 import java.io.File;
@@ -15,7 +16,7 @@ public class ExecuteScript extends Command {
     private final CommandManager commandManager;
 
     public ExecuteScript(CommandManager commandManager) {
-        super(true, null); // требует аргумент, но не требует collectionManager
+        super(true, null);
         this.commandManager = commandManager;
     }
 
@@ -37,18 +38,28 @@ public class ExecuteScript extends Command {
             throw new RecursiveScriptException("Обнаружен рекурсивный вызов скрипта: " + fileName);
         }
 
-        try (Scanner scanner = new Scanner(new File(fileName))) {
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine().trim();
-                if (!line.isEmpty()) {
-                    String[] args = line.split("\\s+", 2);
-                    commandManager.executeCommand(args);
+        try (Scanner fileScanner = new Scanner(new File(fileName))) {
+            CommandMode previousMode = commandManager.getCurrentMode();
+            Scanner previousScanner = commandManager.getScanner();
+            
+            commandManager.setCurrentMode(CommandMode.NonUserMode);
+            commandManager.setScanner(fileScanner);
+            
+            try {
+                while (fileScanner.hasNextLine()) {
+                    String line = fileScanner.nextLine().trim();
+                    if (!line.isEmpty()) {
+                        String[] args = line.split("\\s+", 2);
+                        commandManager.executeCommand(args);
+                    }
                 }
+            } finally {
+                commandManager.setCurrentMode(previousMode);
+                commandManager.setScanner(previousScanner);
+                executedScripts.remove(fileName);
             }
         } catch (FileNotFoundException e) {
-            System.out.println("Файл не найден: " + e.getMessage());
-        } finally {
-            executedScripts.remove(fileName);
+            System.out.println("Файл не найден: " + fileName);
         }
     }
 

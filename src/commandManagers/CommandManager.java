@@ -19,8 +19,9 @@ public class CommandManager {
      and the value is an instance of the corresponding Command subclass.
      */
     private LinkedHashMap<String, Command> commandMap;
-    private final Scanner scanner;
+    private Scanner scanner;
     private final StudyGroupCollectionManager collectionManager;
+    private CommandMode currentMode = CommandMode.CLI_UserMode;
 
     /**
      * Новый конструктор, получающий заранее созданный экземпляр StudyGroupCollectionManager.
@@ -42,8 +43,8 @@ public class CommandManager {
         commandMap.put("help", new Help());
         commandMap.put("info", new Info(collectionManager));
         commandMap.put("show", new Show(collectionManager));
-        commandMap.put("add", new Add(collectionManager, scanner));
-        commandMap.put("update_id", new UpdateId(collectionManager, scanner));
+        commandMap.put("add", new Add(collectionManager, scanner, this));
+        commandMap.put("update_id", new UpdateId(collectionManager, this));
         commandMap.put("remove_by_id", new RemoveById(collectionManager));
         commandMap.put("clear", new Clear(collectionManager));
         commandMap.put("save", new SaveCollection(collectionManager));
@@ -70,23 +71,49 @@ public class CommandManager {
         return commandMap;
     }
 
+    public void setCurrentMode(CommandMode mode) {
+        this.currentMode = mode;
+    }
+
+    public CommandMode getCurrentMode() {
+        return currentMode;
+    }
+
+    public Scanner getScanner() {
+        return scanner;
+    }
+
+    public void setScanner(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
     /**
      * Universe method for command executing.
      */
     public void executeCommand(String[] args) {
         try {
             if (args.length > 1)
-                Optional.ofNullable(commandMap.get(args[0])).orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( ")).setArgument(args[1]);
-            Optional.ofNullable(commandMap.get(args[0])).orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( ")).execute();
+                Optional.ofNullable(commandMap.get(args[0]))
+                    .orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( "))
+                    .setArgument(args[1]);
+            Optional.ofNullable(commandMap.get(args[0]))
+                .orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( "))
+                .execute();
         } catch (IllegalArgumentException | NullPointerException | NoSuchElementException e) {
             System.err.println("Выполнение команды пропущено из-за неправильных предоставленных аргументов! (" + e.getMessage() + ")");
-            throw new CommandInterruptedException(e);
+            if (currentMode == CommandMode.CLI_UserMode) {
+                throw new CommandInterruptedException(e);
+            }
         } catch (BuildObjectException | UnknownCommandException e) {
             System.err.println(e.getMessage());
-            throw new CommandInterruptedException(e);
+            if (currentMode == CommandMode.CLI_UserMode) {
+                throw new CommandInterruptedException(e);
+            }
         } catch (Exception e) {
             System.err.println("В командном менеджере произошла непредвиденная ошибка! ");
-            throw new CommandInterruptedException(e);
+            if (currentMode == CommandMode.CLI_UserMode) {
+                throw new CommandInterruptedException(e);
+            }
         }
     }
 }
