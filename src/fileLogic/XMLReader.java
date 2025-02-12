@@ -106,10 +106,13 @@ public class XMLReader {
                 break;
             case "coordinates":
                 try {
-                    java.lang.reflect.Method method = Coordinates.class.getMethod("fromString", String.class);
-                    Coordinates coordinates = (Coordinates) method.invoke(null, value);
-                    group.setCoordinates(coordinates);
+                    // Создаем Coordinates напрямую из значений
+                    String[] parts = value.split(",");
+                    Long x = Long.parseLong(parts[0].trim());
+                    Long y = Long.parseLong(parts[1].trim());
+                    group.setCoordinates(new Coordinates(x, y));
                 } catch (Exception e) {
+                    System.err.println("Ошибка при парсинге coordinates: " + value);
                     e.printStackTrace();
                 }
                 break;
@@ -181,10 +184,14 @@ public class XMLReader {
                 break;
             case "location":
                 try {
-                    java.lang.reflect.Method method = Location.class.getMethod("fromString", String.class);
-                    Location location = (Location) method.invoke(null, value);
-                    person.setLocation(location);
+                    // Создаем Location напрямую из значений
+                    String[] parts = value.split(",");
+                    Float x = Float.parseFloat(parts[0].trim());
+                    Float y = Float.parseFloat(parts[1].trim());
+                    Float z = Float.parseFloat(parts[2].trim());
+                    person.setLocation(new Location(x, y, z));
                 } catch (Exception e) {
+                    System.err.println("Ошибка при парсинге location: " + value);
                     e.printStackTrace();
                 }
                 break;
@@ -211,10 +218,7 @@ public class XMLReader {
     
     /**
      * Извлекает значение между открывающим и закрывающим тегом.
-     *
-     * @param line строка, содержащая XML-тег
-     * @param tagName имя тега
-     * @return содержимое тега или пустая строка, если тег не найден
+     * Теперь поддерживает многострочные значения.
      */
     private static String getTagValue(String line, String tagName) {
         String openTag = "<" + tagName + ">";
@@ -222,7 +226,9 @@ public class XMLReader {
         int start = line.indexOf(openTag);
         int end = line.indexOf(closeTag);
         if (start != -1 && end != -1) {
-            return line.substring(start + openTag.length(), end).trim();
+            return line.substring(start + openTag.length(), end)
+                      .trim()
+                      .replaceAll("\n\\s*", ""); // Удаляем переносы строк и лишние пробелы
         }
         return "";
     }

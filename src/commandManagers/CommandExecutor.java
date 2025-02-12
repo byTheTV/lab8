@@ -29,12 +29,11 @@ public class CommandExecutor {
      * Перед началом работы сразу вызывается команда help для вывода справки по доступным командам.
      *
      * @param in   InputStream для чтения команд
-     * @param mode режим работы команд (например, CLI_UserMode)
      */
-    public void startExecuting(InputStream in, CommandMode mode) {
+    public void startExecuting(InputStream in) {
         Scanner scanner = new Scanner(in);
         // Передаём уже существующий collectionManager в CommandManager
-        CommandManager commandManager = new CommandManager(mode, scanner, collectionManager);
+        CommandManager commandManager = new CommandManager(scanner, collectionManager);
         
         // Вызываем команду help сразу при запуске, чтобы вывести список всех доступных команд
         if (commandManager.getCommandMap().containsKey("help")) {

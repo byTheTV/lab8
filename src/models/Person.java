@@ -1,8 +1,8 @@
 package models;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+//import java.util.HashSet;
+//import java.util.Set;
 
 public class Person implements Comparable<Person> {
    
@@ -12,7 +12,7 @@ public class Person implements Comparable<Person> {
     private Color eyeColor; // Поле не может быть null
     private Location location; // Поле не может быть null
 
-    private static Set<String> usedPassportIDs = new HashSet<>();
+   // private static Set<String> usedPassportIDs = new HashSet<>();
 
     public Person() {}
 

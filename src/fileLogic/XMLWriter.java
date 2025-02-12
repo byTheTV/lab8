@@ -43,13 +43,12 @@ public class XMLWriter {
         writer.write(innerIndent + "<id>" + group.getId() + "</id>\n");
         writer.write(innerIndent + "<name>" + escapeXml(group.getName()) + "</name>\n");
 
-        // Сериализация координат с разбиением на отдельные теги
+        // Сериализация координат в одну строку
         if (group.getCoordinates() != null) {
-            writer.write(innerIndent + "<coordinates>\n");
-            String coordIndent = innerIndent + "    ";
-            writer.write(coordIndent + "<x>" + group.getCoordinates().getX() + "</x>\n");
-            writer.write(coordIndent + "<y>" + group.getCoordinates().getY() + "</y>\n");
-            writer.write(innerIndent + "</coordinates>\n");
+            writer.write(innerIndent + "<coordinates>" + 
+                group.getCoordinates().getX() + ", " + 
+                group.getCoordinates().getY() + 
+                "</coordinates>\n");
         }
 
         writer.write(innerIndent + "<creationDate>" + group.getCreationDate().toString() + "</creationDate>\n");
@@ -88,14 +87,13 @@ public class XMLWriter {
         }
         writer.write(indent + "<eyeColor>" + escapeXml(person.getEyeColor().toString()) + "</eyeColor>\n");
         
-        // Сериализация локации с разбиением на отдельные теги
+        // Сериализация локации в одну строку
         if (person.getLocation() != null) {
-            writer.write(indent + "<location>\n");
-            String locIndent = indent + "    ";
-            writer.write(locIndent + "<x>" + person.getLocation().getX() + "</x>\n");
-            writer.write(locIndent + "<y>" + person.getLocation().getY() + "</y>\n");
-            writer.write(locIndent + "<z>" + person.getLocation().getZ() + "</z>\n");
-            writer.write(indent + "</location>\n");
+            writer.write(indent + "<location>" + 
+                person.getLocation().getX() + ", " + 
+                person.getLocation().getY() + ", " + 
+                person.getLocation().getZ() + 
+                "</location>\n");
         }
     }
 

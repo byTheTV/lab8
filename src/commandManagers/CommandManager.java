@@ -25,11 +25,10 @@ public class CommandManager {
     /**
      * Новый конструктор, получающий заранее созданный экземпляр StudyGroupCollectionManager.
      *
-     * @param mode режим работы команд (например, CLI_UserMode)
      * @param scanner сканер для чтения ввода
      * @param collectionManager корректно инициализированный менеджер коллекции
      */
-    public CommandManager(CommandMode mode, Scanner scanner, StudyGroupCollectionManager collectionManager) {
+    public CommandManager(Scanner scanner, StudyGroupCollectionManager collectionManager) {
         this.scanner = scanner;
         if (collectionManager == null) {
             throw new IllegalArgumentException("CollectionManager не должен быть null!");
@@ -48,9 +47,7 @@ public class CommandManager {
         commandMap.put("remove_by_id", new RemoveById(collectionManager));
         commandMap.put("clear", new Clear(collectionManager));
         commandMap.put("save", new SaveCollection(collectionManager));
-        
-        // Добавляем оставшиеся команды
-        // Если в будущем будет реализована команда execute_script, можно добавить её здесь.
+        commandMap.put("execute_script", new ExecuteScript(this));
         commandMap.put("exit", new Exit(collectionManager));
         commandMap.put("head", new Head(collectionManager));
         commandMap.put("remove_head", new RemoveHead(collectionManager));

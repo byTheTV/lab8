@@ -84,6 +84,19 @@ public class StudyGroup implements Comparable<StudyGroup> {
 
     @Override
     public int compareTo(StudyGroup other) {
+        // Сначала сравниваем по количеству студентов
+        int compareStudents = Long.compare(this.studentsCount, other.studentsCount);
+        if (compareStudents != 0) {
+            return compareStudents;
+        }
+        
+        // Если количество студентов одинаковое, сравниваем по имени
+        int compareName = this.name.compareTo(other.name);
+        if (compareName != 0) {
+            return compareName;
+        }
+        
+        // Если и имена одинаковые, сравниваем по id
         return this.id.compareTo(other.id);
     }
 
