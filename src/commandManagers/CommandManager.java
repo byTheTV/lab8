@@ -1,11 +1,11 @@
 package commandManagers;
 
+import collectionManagers.StudyGroupCollectionManager;
 import commandManagers.commands.*;
 import exceptions.BuildObjectException;
 import exceptions.CommandInterruptedException;
 import exceptions.UnknownCommandException;
 import java.util.*;
-import collectionManagers.StudyGroupCollectionManager;
 
 /**
  The CommandManager class is responsible for managing all available commands in the application.
@@ -15,22 +15,31 @@ import collectionManagers.StudyGroupCollectionManager;
 public class CommandManager {
 
     /**
-     A HashMap object that stores all available commands in the application. The key is the command name
+     A LinkedHashMap object that stores all available commands in the application. The key is the command name
      and the value is an instance of the corresponding Command subclass.
      */
     private LinkedHashMap<String, Command> commandMap;
     private final Scanner scanner;
+    private final StudyGroupCollectionManager collectionManager;
 
     /**
-     * Default command manager setup.
+     * Новый конструктор, получающий заранее созданный экземпляр StudyGroupCollectionManager.
      *
-     * @since 1.0
+     * @param mode режим работы команд (например, CLI_UserMode)
+     * @param scanner сканер для чтения ввода
+     * @param collectionManager корректно инициализированный менеджер коллекции
      */
-    public CommandManager(CommandMode mode, Scanner scanner) {
+    public CommandManager(CommandMode mode, Scanner scanner, StudyGroupCollectionManager collectionManager) {
         this.scanner = scanner;
-        commandMap = new LinkedHashMap<>();
-        StudyGroupCollectionManager collectionManager = new StudyGroupCollectionManager();
+        if (collectionManager == null) {
+            throw new IllegalArgumentException("CollectionManager не должен быть null!");
+        }
+        this.collectionManager = collectionManager;
+        initializeCommands();
+    }
 
+    private void initializeCommands() {
+        commandMap = new LinkedHashMap<>();
         commandMap.put("help", new Help());
         commandMap.put("info", new Info(collectionManager));
         commandMap.put("show", new Show(collectionManager));
@@ -38,17 +47,21 @@ public class CommandManager {
         commandMap.put("update_id", new UpdateId(collectionManager, scanner));
         commandMap.put("remove_by_id", new RemoveById(collectionManager));
         commandMap.put("clear", new Clear(collectionManager));
-       /*
-        commandMap.put("save", new Save(collectionManager));
-        commandMap.put("execute_script", new ExecuteScript());
-        commandMap.put("exit", new Exit());
+        commandMap.put("save", new SaveCollection(collectionManager));
+        
+        // Добавляем оставшиеся команды
+        // Если в будущем будет реализована команда execute_script, можно добавить её здесь.
+        commandMap.put("exit", new Exit(collectionManager));
         commandMap.put("head", new Head(collectionManager));
         commandMap.put("remove_head", new RemoveHead(collectionManager));
-        commandMap.put("remove_lower", new RemoveLower(collectionManager, scanner));
+        commandMap.put("remove_lower", new RemoveLower(collectionManager));
         commandMap.put("average_of_transferred_students", new AverageOfTransferredStudents(collectionManager));
         commandMap.put("group_counting_by_form_of_education", new GroupCountingByFormOfEducation(collectionManager));
         commandMap.put("print_field_ascending_group_admin", new PrintFieldAscendingGroupAdmin(collectionManager));
-    */
+    }
+
+    public void initializeData(String dataFile) {
+        collectionManager.initializeData(dataFile);
     }
 
     /**

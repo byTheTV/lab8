@@ -3,18 +3,25 @@ package models;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
+/**
+ * Класс StudyGroup представляет учебную группу с набором характеристик, включая объект-администратора.
+ * Поле id генерируется автоматически, его значение > 0 и уникально.
+ */
 public class StudyGroup implements Comparable<StudyGroup> {
-    private Integer id; // Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
-    private String name; // Поле не может быть null, Строка не может быть пустой
+    private static int idCounter = 1; // Счётчик для автоматической генерации уникального id
+
+    private Integer id; // Поле не может быть null, значение > 0, уникальное, генерируется автоматически
+    private String name; // Поле не может быть null, не пустое
     private Coordinates coordinates; // Поле не может быть null
-    private ZonedDateTime creationDate; // Поле не может быть null, Значение этого поля должно генерироваться автоматически
-    private long studentsCount; // Значение поля должно быть больше 0
-    private int expelledStudents; // Значение поля должно быть больше 0
-    private int transferredStudents; // Значение поля должно быть больше 0
-    private FormOfEducation formOfEducation; // Поле может быть null
+    private ZonedDateTime creationDate; // Поле не может быть null, генерируется автоматически
+    private long studentsCount; // Значение > 0
+    private int expelledStudents; // Значение > 0
+    private int transferredStudents; // Значение > 0
+    private FormOfEducation formOfEducation; // Может быть null
     private Person groupAdmin; // Поле не может быть null
 
     public StudyGroup() {
+        this.id = idCounter++;                // Автоматическая генерация уникального id
         this.creationDate = ZonedDateTime.now();
     }
 
@@ -91,5 +98,37 @@ public class StudyGroup implements Comparable<StudyGroup> {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+    
+    /**
+     * Переопределенный метод toString() возвращает красиво отформатированное представление объекта StudyGroup.
+     * Информация об администраторе выводится полностью с отступом для улучшенной читаемости.
+     */
+    @Override
+    public String toString() {
+        String separator = "----------------------------------------\n";
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(separator);
+        sb.append("StudyGroup Details:\n");
+        sb.append(separator);
+        sb.append(String.format("ID                 : %s%n", id != null ? id : "N/A"));
+        sb.append(String.format("Name               : %s%n", name != null ? name : "N/A"));
+        sb.append(String.format("Coordinates        : %s%n", coordinates != null ? coordinates.toString() : "N/A"));
+        sb.append(String.format("Creation Date      : %s%n", creationDate != null ? creationDate.toString() : "N/A"));
+        sb.append(String.format("Students Count     : %d%n", studentsCount));
+        sb.append(String.format("Expelled Students  : %d%n", expelledStudents));
+        sb.append(String.format("Transferred Students: %d%n", transferredStudents));
+        sb.append(String.format("Form Of Education  : %s%n", formOfEducation != null ? formOfEducation : "N/A"));
+        sb.append("Group Admin:\n");
+        if (groupAdmin != null) {
+            // Вызывается красивый toString() объекта Person с отступами
+            String adminDetails = groupAdmin.toString().replaceAll("(?m)^", "    ");
+            sb.append(adminDetails);
+        } else {
+            sb.append("    None\n");
+        }
+        sb.append(separator);
+        return sb.toString();
     }
 }

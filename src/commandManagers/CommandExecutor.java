@@ -1,35 +1,66 @@
 package commandManagers;
 
-import exceptions.CommandInterruptedException;
+import collectionManagers.StudyGroupCollectionManager;
+import exceptions.BuildObjectException;
 import java.io.InputStream;
-import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 /**
- * A class for executing commands from an input stream.
+ * CommandExecutor обеспечивает запуск цикла обработки команд.
  */
 public class CommandExecutor {
+
+    private final StudyGroupCollectionManager collectionManager;
+
     /**
-     * Start executing commands from InputStream.
+     * Конструктор, получающий заранее инициализированный менеджер коллекции.
      *
-     * @param input commands stream (File, System.in, e.t.c.)
-     * @param mode  variant of command behavior (see CommandMode enum)
+     * @param collectionManager корректный экземпляр StudyGroupCollectionManager
      */
-    public void startExecuting(InputStream input, CommandMode mode) {
-        Scanner cmdScanner = new Scanner(input);
-        CommandManager commandManager = new CommandManager(mode, cmdScanner);
-       
-        while (cmdScanner.hasNext()) {
-            String line = cmdScanner.nextLine().trim();
-            if (line.isEmpty()) continue;
+    public CommandExecutor(StudyGroupCollectionManager collectionManager) {
+        if (collectionManager == null) {
+            throw new IllegalArgumentException("StudyGroupCollectionManager не должен быть null");
+        }
+        this.collectionManager = collectionManager;
+    }
+
+    /**
+     * Запускает цикл обработки команд, используя переданный InputStream.
+     * Перед началом работы сразу вызывается команда help для вывода справки по доступным командам.
+     *
+     * @param in   InputStream для чтения команд
+     * @param mode режим работы команд (например, CLI_UserMode)
+     */
+    public void startExecuting(InputStream in, CommandMode mode) {
+        Scanner scanner = new Scanner(in);
+        // Передаём уже существующий collectionManager в CommandManager
+        CommandManager commandManager = new CommandManager(mode, scanner, collectionManager);
+        
+        // Вызываем команду help сразу при запуске, чтобы вывести список всех доступных команд
+        if (commandManager.getCommandMap().containsKey("help")) {
             try {
-                commandManager.executeCommand(line.split(" "));
-                System.out.println();
-            } catch (CommandInterruptedException | NoSuchElementException ex) {
-                if (mode.equals(CommandMode.CLI_UserMode))
-                    System.err.println("Выполнение команды было прервано. Вы можете продолжать работу. Программа возвращена в безопасное состояние.");
-                else System.err.println("Команда была пропущена... Обработчик продолжает работу");
+                commandManager.getCommandMap().get("help").execute();
+            } catch (BuildObjectException e) {
+                System.err.println("Ошибка выполнения команды help: " + e.getMessage());
             }
         }
+        
+        System.out.println("Командный режим запущен. Введите команды (для выхода введите 'exit'):");
+        while (scanner.hasNextLine()) {
+            System.out.print("> ");
+            String inputLine = scanner.nextLine().trim();
+            if (inputLine.isEmpty()) continue;
+            String[] args = inputLine.split("\\s+");
+            if ("exit".equalsIgnoreCase(args[0])) {
+                System.out.println("Выход из командного режима.");
+                break;
+            }
+            try {
+                commandManager.executeCommand(args);
+            } catch (Exception e) {
+                System.err.println("Ошибка выполнения команды: " + e.getMessage());
+            }
+        }
+        scanner.close();
     }
 }

@@ -28,4 +28,9 @@ public class Coordinates {
 
     public Long getX() { return x; }
     public Long getY() { return y; }
+    
+    @Override
+    public String toString() {
+        return "Coordinates{" +"x=" + x +", y=" + y + '}';
+    }
 }   

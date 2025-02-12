@@ -32,7 +32,31 @@ public class Location {
         this.z = z;
     }
 
-    public Float getX() { return x; }
-    public Float getY() { return y; }
-    public Float getZ() { return z; }
+    public Float getX() {
+        return x;
+    }
+    
+    public Float getY() {
+        return y;
+    }
+    
+    public Float getZ() {
+        return z;
+    }
+
+    /**
+     * Переопределённый метод toString возвращает красиво отформатированное
+     * строковое представление объекта Location.
+     */
+    @Override
+    public String toString() {
+        String separator = "----------------------------------\n";
+        return separator +
+               "          Location Details         \n" +
+               separator +
+               String.format("X: %s%n", x != null ? x : "N/A") +
+               String.format("Y: %s%n", y != null ? y : "N/A") +
+               String.format("Z: %s%n", z != null ? z : "N/A") +
+               separator;
+    }
 }

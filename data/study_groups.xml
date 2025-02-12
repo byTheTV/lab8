@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<studyGroups>
+    <studyGroup0>
+        <id>1</id>
+        <name>Группа М3101</name>
+        <coordinates>
+            <x>123</x>
+            <y>456</y>
+        </coordinates>
+        <creationDate>2024-03-20T10:15:30+03:00</creationDate>
+        <studentsCount>25</studentsCount>
+        <expelledStudents>2</expelledStudents>
+        <transferredStudents>3</transferredStudents>
+        <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <name>Иванов Иван</name>
+            <birthday>2000-05-15</birthday>
+            <passportID>AB123456</passportID>
+            <eyeColor>GREEN</eyeColor>
+            <location>
+                <x>10.5</x>
+                <y>20.7</y>
+                <z>30.2</z>
+            </location>
+        </groupAdmin>
+    </studyGroup0>
+    <studyGroup1>
+        <id>2</id>
+        <name>Группа М3102</name>
+        <coordinates>
+            <x>567</x>
+            <y>234</y>
+        </coordinates>
+        <creationDate>2024-03-20T10:20:30+03:00</creationDate>
+        <studentsCount>28</studentsCount>
+        <expelledStudents>4</expelledStudents>
+        <transferredStudents>5</transferredStudents>
+        <formOfEducation>FULL_TIME_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <name>Петров Петр</name>
+            <birthday>1999-08-22</birthday>
+            <passportID>CD789012</passportID>
+            <eyeColor>RED</eyeColor>
+            <location>
+                <x>15.3</x>
+                <y>25.8</y>
+                <z>35.9</z>
+            </location>
+        </groupAdmin>
+    </studyGroup1>
+</studyGroups> 

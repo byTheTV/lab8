@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Study_groups>
+    <StudyGroup>
+        <id>null</id>
+        <name>1</name>
+        <coordinates>Coordinates{x=1, y=1}</coordinates>
+        <creationDate>2025-02-12T22:23:26.266361200+03:00[Europe/Moscow]</creationDate>
+        <studentsCount>1</studentsCount>
+        <expelledStudents>1</expelledStudents>
+        <transferredStudents>1</transferredStudents>
+        <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <name>1</name>
+            <eyeColor>GREEN</eyeColor>
+            <location>models.Location@2077d4de</location>
+        </groupAdmin>
+    </StudyGroup>
+    <StudyGroup>
+        <id>null</id>
+        <name>2</name>
+        <coordinates>Coordinates{x=2, y=2}</coordinates>
+        <creationDate>2025-02-12T22:23:37.501534700+03:00[Europe/Moscow]</creationDate>
+        <studentsCount>2</studentsCount>
+        <expelledStudents>2</expelledStudents>
+        <transferredStudents>2</transferredStudents>
+        <formOfEducation>DISTANCE_EDUCATION</formOfEducation>
+        <groupAdmin>
+            <name>2</name>
+            <eyeColor>RED</eyeColor>
+            <location>models.Location@7591083d</location>
+        </groupAdmin>
+    </StudyGroup>
+</Study_groups>

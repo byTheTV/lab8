@@ -72,4 +72,24 @@ public class Person implements Comparable<Person> {
     public int compareTo(Person other) {
         return this.name.compareTo(other.name);
     }
+
+    /**
+     * Переопределённый метод toString возвращает структурированное и красиво отформатированное
+     * строковое представление объекта Person, содержащее все значимые поля.
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        String separator = "====================================\n";
+        sb.append(separator)
+          .append("            Person Details          \n")
+          .append(separator)
+          .append(String.format("Name         : %s%n", name != null ? name : "N/A"))
+          .append(String.format("Birthday     : %s%n", birthday != null ? birthday.toString() : "N/A"))
+          .append(String.format("Passport ID  : %s%n", passportID != null ? passportID : "N/A"))
+          .append(String.format("Eye Color    : %s%n", eyeColor != null ? eyeColor.toString() : "N/A"))
+          .append(String.format("Location     : %s%n", location != null ? location.toString() : "N/A"))
+          .append(separator);
+        return sb.toString();
+    }
 }

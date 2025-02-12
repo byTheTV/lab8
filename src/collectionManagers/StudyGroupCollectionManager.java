@@ -1,8 +1,11 @@
 package collectionManagers;
 
-import models.StudyGroup;
+import fileLogic.XMLReader;
+import fileLogic.XMLWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
+import java.util.Collection;
+import models.StudyGroup;
 
 /**
  * Class that manages the collection of StudyGroup objects.
@@ -12,14 +15,64 @@ public class StudyGroupCollectionManager {
     private ArrayDeque<StudyGroup> collection;
     private LocalDateTime creationDate;
     private String collectionType;
+    private String dataFile;
+
+    public StudyGroupCollectionManager() {
+        this.creationDate = LocalDateTime.now();
+        this.collection = new ArrayDeque<>();
+        this.collectionType = collection.getClass().getSimpleName();
+    }
 
     /**
-     * Constructor initializes an empty collection
+     * Инициализирует путь к файлу с данными.
+     *
+     * @param filename имя файла с данными
+     * @return true, если инициализация прошла успешно, иначе false
      */
-    public StudyGroupCollectionManager() {
-        this.collection = new ArrayDeque<>();
-        this.creationDate = LocalDateTime.now();
-        this.collectionType = collection.getClass().getSimpleName();
+    public boolean initializeData(String filename) {
+        if (filename == null || filename.trim().isEmpty()) {
+            System.err.println("Имя файла не может быть пустым!");
+            return false;
+        }
+        this.dataFile = filename;
+        return true;
+    }
+
+    /**
+     * Загружает коллекцию из XML-файла, заданного в dataFile.
+     *
+     * @return true, если загрузка прошла успешно, иначе false
+     */
+    public boolean load() {
+        try {
+            Collection<StudyGroup> loadedGroups = XMLReader.readStudyGroupCollection(dataFile);
+            if (loadedGroups == null) {
+                System.err.println("Не удалось загрузить коллекцию: результат null");
+                return false;
+            }
+            collection.clear();
+            collection.addAll(loadedGroups);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Ошибка при загрузке коллекции: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
+     * Сохраняет коллекцию в XML-файл.
+     *
+     * @return true, если сохранение прошло успешно, иначе false
+     */
+    public boolean saveCollection() {
+        try {
+            XMLWriter.writeStudyGroupCollection((Collection<StudyGroup>) collection, dataFile);
+            return true;
+        } catch (Exception e) {
+            System.err.println("Ошибка при сохранении коллекции: " + e.getMessage());
+            return false;
+        }
     }
 
     /**
@@ -129,5 +182,22 @@ public class StudyGroupCollectionManager {
      */
     public int getSize() {
         return collection.size();
+    }
+
+    /**
+     * Возвращает строковое представление состояния коллекции.
+     *
+     * @return строка с информацией о коллекции
+     */
+    public String to_string() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Тип коллекции: ").append(collectionType).append("\n")
+          .append("Размер коллекции: ").append(getSize()).append("\n")
+          .append("Дата создания: ").append(creationDate).append("\n")
+          .append("Элементы коллекции:\n");
+        for (StudyGroup group : collection) {
+            sb.append(group).append("\n");
+        }
+        return sb.toString();
     }
 } 
