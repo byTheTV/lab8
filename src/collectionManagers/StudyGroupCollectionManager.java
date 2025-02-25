@@ -55,7 +55,7 @@ public class StudyGroupCollectionManager {
             return true;
         } catch (Exception e) {
             System.err.println("Ошибка при загрузке коллекции: " + e.getMessage());
-            e.printStackTrace();
+     //       e.printStackTrace();
             return false;
         }
     }

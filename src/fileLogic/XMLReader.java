@@ -7,12 +7,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Scanner;
-import models.StudyGroup;
-import models.Person;
+import models.Color;
 import models.Coordinates;
 import models.FormOfEducation;
-import models.Color;
 import models.Location;
+import models.Person;
+import models.StudyGroup;
 
 public class XMLReader {
 
@@ -97,7 +97,7 @@ public class XMLReader {
                     java.lang.reflect.Field field = group.getClass().getDeclaredField("id");
                     field.setAccessible(true);
                     field.set(group, id);
-                } catch (Exception e) {
+                } catch (IllegalAccessException | IllegalArgumentException | NoSuchFieldException | SecurityException e) {
                     e.printStackTrace();
                 }
                 break;
@@ -109,6 +109,7 @@ public class XMLReader {
                     // Создаем Coordinates напрямую из значений
                     String[] parts = value.split(",");
                     Long x = Long.parseLong(parts[0].trim());
+
                     Long y = Long.parseLong(parts[1].trim());
                     group.setCoordinates(new Coordinates(x, y));
                 } catch (Exception e) {

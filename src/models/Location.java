@@ -5,6 +5,14 @@ public class Location {
     private Float y; // Поле не может быть null
     private Float z; // Поле не может быть null
 
+    /**
+     * Конструктор для создания объекта {@code Location}.
+     *
+     * @param x координата X (не может быть {@code null}).
+     * @param y координата Y (не может быть {@code null}).
+     * @param z координата Z (не может быть {@code null}).
+     * @throws IllegalArgumentException если какой-либо из параметров равен {@code null}.
+     */
     public Location(Float x, Float y, Float z) {
         setX(x);
         setY(y);

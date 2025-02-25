@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"collectionManagers"},{"l":"commandManagers"},{"l":"commandManagers.commands"},{"l":"fileLogic"},{"l":"models"}];updateSearchResults();

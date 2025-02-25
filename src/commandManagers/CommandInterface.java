@@ -3,12 +3,14 @@ package commandManagers;
 import exceptions.BuildObjectException;
 
 /**
- An interface that represents a command object that can be executed and checked for valid arguments.
+ * Интерфейс для реализации команд.
  */
 public interface CommandInterface {
 
     /**
-     Executes the command.
+     * Выполняет команду.
+     *
+     * @throws BuildObjectException если происходит ошибка при построении объекта.
      */
     void execute() throws BuildObjectException;
 
@@ -27,9 +29,10 @@ public interface CommandInterface {
     String getDescr();
 
     /**
-     Checks if the provided argument is valid for the command.
-     @param argument the argument to check for validity
-     @return true if the argument is valid, false otherwise
+     * Checks if the provided argument is valid for the command.
+     *
+     * @param argument the argument to check for validity
+     * @return true if the argument is valid, false otherwise
      */
     boolean checkArgument(Object argument);
 }

@@ -4,6 +4,9 @@ import java.time.LocalDate;
 //import java.util.HashSet;
 //import java.util.Set;
 
+/**
+ * Класс {@code Person} представляет администратора группы с информацией о личности.
+ */
 public class Person implements Comparable<Person> {
    
     private String name; // Поле не может быть null, Строка не может быть пустой
@@ -14,8 +17,18 @@ public class Person implements Comparable<Person> {
 
    // private static Set<String> usedPassportIDs = new HashSet<>();
 
+    /**
+     * Конструктор по умолчанию.
+     */
     public Person() {}
 
+    /**
+     * Конструктор с параметрами для задания основных характеристик.
+     *
+     * @param name имя администратора.
+     * @param birthday дата рождения администратора.
+     * @param passportID идентификатор паспорта.
+     */
     public Person(String name, LocalDate birthday, String passportID, 
                  Color eyeColor, Location location) {
         setName(name);
@@ -62,6 +75,11 @@ public class Person implements Comparable<Person> {
         this.location = location;
     }
 
+    /**
+     * Возвращает имя администратора.
+     *
+     * @return имя.
+     */
     public String getName() { return name; }
     public LocalDate getBirthday() { return birthday; }
     public String getPassportID() { return passportID; }
@@ -74,8 +92,9 @@ public class Person implements Comparable<Person> {
     }
 
     /**
-     * Переопределённый метод toString возвращает структурированное и красиво отформатированное
-     * строковое представление объекта Person, содержащее все значимые поля.
+     * Возвращает строковое представление объекта {@code Person} с подробностями.
+     *
+     * @return отформатированная строка с характеристиками администратора.
      */
     @Override
     public String toString() {

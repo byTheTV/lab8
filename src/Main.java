@@ -1,11 +1,42 @@
 import collectionManagers.StudyGroupCollectionManager;
 import commandManagers.CommandExecutor;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
+/**
+ * Точка входа в приложение.
+ * <p>
+ * Приложение ожидает путь к XML-файлу, содержащему данные, переданный в качестве аргумента командной строки.
+ * Если аргумент не передан или является пустой строкой, будет использоваться файл по умолчанию со следующим именем: {@code default.xml}.
+ * После инициализации менеджера коллекции происходит загрузка данных и запуск командного обработчика в режиме CLI.
+ * </p>
+ * <p>
+ * Пример запуска:
+ * <blockquote><pre>
+ * java -cp . Main study_groups.xml
+ * cd "d:\.Javaproj\lab5\src\" ; if ($?) { javac Main.java } ; if ($?) { java Main study_groups.xml }
+ * gradle runProgram --console=plain
+ * </pre></blockquote>
+ * </p>
+ *
+ * @author T.V.
+ * @version 1.0
+ */
 public class Main {
+
+    /**
+     * Основной метод приложения.
+     *
+     * @param args Аргументы командной строки, где ожидается, что первый аргумент содержит путь к XML-файлу.
+     *             Если аргументы отсутствуют или первый аргумент пуст, используется {@code study_groups.xml}.
+     */
     public static void main(String[] args) {
         try {
-            // Проверка буфера аргументов. Если имя файла не передано или передан пустой буфер, используем файл по умолчанию.
-            String dataFile = "src/study_groups.xml";
+            System.setOut(new PrintStream(System.out, true, "UTF-8"));
+            // Проверка аргументов командной строки.
+            // Если имя файла не передано или передан пустой буфер, используем файл по умолчанию.
+            String dataFile = "src/resourses/study_groups.xml";
             if (args.length < 1 || args[0].trim().isEmpty()) {
                 System.out.println("Имя файла не указано или передан пустой буфер. Используем файл по умолчанию: " + dataFile);
             } else {
@@ -37,7 +68,7 @@ public class Main {
                 System.err.println("Ошибка: Не удалось загрузить коллекцию из файла: " + dataFile);
             }
             
-            // Передаём менеджер коллекции в CommandExecutor
+            // Передаём менеджер коллекции в CommandExecutor и запускаем выполнение команд в CLI режиме
             CommandExecutor executor = new CommandExecutor(manager);
             executor.startExecuting(System.in);
             
@@ -46,3 +77,9 @@ public class Main {
         }
     }
 } 
+
+/*
+javadoc -d doc -sourcepath src -subpackages models:collectionManagers:commandManagers:fileLogic
+
+jetbra.in/s
+*/

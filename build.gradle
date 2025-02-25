@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+}
+
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src'] // Указываем папку с исходными файлами
+        }
+    }
+}
+
+
+task runProgram(type: JavaExec) {
+    group = 'Execution'
+    description = 'Запуск основной программы'
+    mainClass = 'Main' // Указываем полное имя класса
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in // Передаем ввод пользователя в программу
+}
