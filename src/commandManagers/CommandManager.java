@@ -44,7 +44,7 @@ public class CommandManager {
         commandMap.put("info", new Info(collectionManager));
         commandMap.put("show", new Show(collectionManager));
         commandMap.put("add", new Add(collectionManager, scanner, this));
-        commandMap.put("update_id", new UpdateId(collectionManager, this));
+        commandMap.put("update_id", new UpdateId(collectionManager, scanner, this));
         commandMap.put("remove_by_id", new RemoveById(collectionManager));
         commandMap.put("clear", new Clear(collectionManager));
         commandMap.put("save", new SaveCollection(collectionManager));

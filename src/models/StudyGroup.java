@@ -50,7 +50,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
         if (expelledStudents <= 0) {
             throw new IllegalArgumentException("Expelled students count must be positive");
         }
-        if (this.studentsCount <= expelledStudents) {
+        if (this.studentsCount < expelledStudents) {
             throw new IllegalArgumentException("Expelled students count must be less than students count");
         }
 
@@ -62,7 +62,7 @@ public class StudyGroup implements Comparable<StudyGroup> {
             throw new IllegalArgumentException("Transferred students count must be positive");
         }
 
-        if (this.studentsCount <= transferredStudents) {
+        if (this.studentsCount < transferredStudents) {
             throw new IllegalArgumentException("Transferred students count must be less than students count");
         }
 
