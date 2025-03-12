@@ -12,7 +12,6 @@ import java.util.Iterator;
 public class RemoveLower extends Command {
 
     public RemoveLower(StudyGroupCollectionManager collectionManager) {
-        // Аргумент обязателен, поэтому передаём true в суперконструктор.
         super(true, collectionManager);
     }
     
@@ -28,14 +27,19 @@ public class RemoveLower extends Command {
     
     @Override
     public void execute() {
-        // Предполагается, что базовый класс Command предоставляет метод getArgument()
-        Object arg = getArgument();
-        if (!(arg instanceof StudyGroup)) {
-            System.out.println("Неверный аргумент для команды remove_lower. Ожидался объект StudyGroup.");
-            return;
+        Long id = null;
+
+        if (argument == null) {
+            throw new IllegalArgumentException("Argument cannot be null");
         }
-        
-        StudyGroup given = (StudyGroup) arg;
+
+        try {
+            id = Long.parseLong((String) argument);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Argument is not a valid long value", e);
+        }
+
+        StudyGroup given = collectionManager.getById(id);
         int removedCount = 0;
         Iterator<StudyGroup> iterator = collectionManager.getCollection().iterator();
         while (iterator.hasNext()) {

@@ -4,6 +4,7 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
+
 /**
  * Точка входа в приложение.
  * <p>
@@ -17,6 +18,7 @@ import java.nio.charset.StandardCharsets;
  * java -cp . Main study_groups.xml
  * cd "d:\.Javaproj\lab5\src\" ; if ($?) { javac Main.java } ; if ($?) { java Main study_groups.xml }
  * gradle runProgram --console=plain
+ *
  * </pre></blockquote>
  * </p>
  *

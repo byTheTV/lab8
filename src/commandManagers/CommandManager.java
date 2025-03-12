@@ -92,24 +92,35 @@ public class CommandManager {
      */
     public void executeCommand(String[] args) {
         try {
-            if (args.length > 1)
-                Optional.ofNullable(commandMap.get(args[0]))
-                    .orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( "))
-                    .setArgument(args[1]);
-            Optional.ofNullable(commandMap.get(args[0]))
-                .orElseThrow(() -> new UnknownCommandException("\nКоманды " + args[0] + " не обнаружено :( "))
-                .execute();
+            if (args.length == 0) {
+                throw new IllegalArgumentException("Команда не указана.");
+            }
+
+            Command command = commandMap.get(args[0]);
+            if (command == null) {
+                throw new UnknownCommandException("\nКоманда " + args[0] + " не обнаружена :( ");
+            }
+
+            if (args.length > 1) {
+                command.setArgument(args[1]);
+            }
+
+            command.execute();
         } catch (IllegalArgumentException | NullPointerException | NoSuchElementException e) {
+            // Обработка ошибок, связанных с аргументами
             System.err.println("Выполнение команды пропущено из-за неправильных предоставленных аргументов! (" + e.getMessage() + ")");
             if (currentMode == CommandMode.CLI_UserMode) {
                 throw new CommandInterruptedException(e);
             }
         } catch (BuildObjectException | UnknownCommandException e) {
-            System.err.println(e.getMessage());
+            // Обработка специфических исключений
+            System.err.println(e.getMessage()); // Выводим сообщение об ошибке
             if (currentMode == CommandMode.CLI_UserMode) {
-                throw new CommandInterruptedException(e);
+                // Не пробрасываем исключение повторно, чтобы избежать дублирования сообщений
+                return; // Завершаем выполнение
             }
         } catch (Exception e) {
+            // Обработка всех остальных исключений
             System.err.println("В командном менеджере произошла непредвиденная ошибка! ");
             if (currentMode == CommandMode.CLI_UserMode) {
                 throw new CommandInterruptedException(e);

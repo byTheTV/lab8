@@ -7,6 +7,7 @@ repositories {
 }
 
 
+
 sourceSets {
     main {
         java {
@@ -15,11 +16,22 @@ sourceSets {
     }
 }
 
+compileJava.options.encoding = 'UTF-8'
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
 
 task runProgram(type: JavaExec) {
     group = 'Execution'
     description = 'Запуск основной программы'
-    mainClass = 'Main' // Указываем полное имя класса
+    mainClass = 'Main' 
     classpath = sourceSets.main.runtimeClasspath
     standardInput = System.in // Передаем ввод пользователя в программу
+
+    // Зависимость от задачи сборки
+    dependsOn 'build'
+    systemProperty 'file.encoding', 'UTF-8'
+    jvmArgs '-Dfile.encoding=UTF-8'
 }

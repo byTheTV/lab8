@@ -27,8 +27,19 @@ public class UpdateId extends Command {
 
     @Override
     public void execute() {
+        Long id = null;
+
+        if (argument == null) {
+            throw new IllegalArgumentException("Argument cannot be null");
+        }
+
         try {
-            Long id = Long.parseLong((String) argument);
+            id = Long.parseLong((String) argument);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Argument is not a valid long value", e);
+        }
+
+        try {
             StudyGroup oldGroup = collectionManager.getById(id);
             if (oldGroup == null) {
                 System.out.println("Элемент с таким id не найден");
@@ -37,15 +48,19 @@ public class UpdateId extends Command {
 
             StudyGroup newGroup = new StudyGroup();
             newGroup.setId(oldGroup.getId());
-            
+
             if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
-                System.out.print("Введите название группы > ");
+                System.out.print("Введите название группы (текущее: " + oldGroup.getName() + ") or (null чтобы оставить значение) > ");
             }
-            newGroup.setName(commandManager.getScanner().nextLine().trim());
-            
-            newGroup.setCoordinates(readCoordinates());
-            newGroup.setStudentsCount(readStudentsCount());
-            newGroup.setExpelledStudents(readExpelledStudents());
+            String nameInput = commandManager.getScanner().nextLine().trim();
+            if (!nameInput.isEmpty()) {
+                newGroup.setName(nameInput);
+            }
+
+
+            newGroup.setCoordinates(readCoordinates(oldGroup.getCoordinates()));
+            newGroup.setStudentsCount(readStudentsCount(oldGroup.getStudentsCount()));
+            newGroup.setExpelledStudents(readExpelledStudents(oldGroup.getExpelledStudents()));
             newGroup.setTransferredStudents(readTransferredStudents());
             newGroup.setFormOfEducation(readFormOfEducation());
             newGroup.setGroupAdmin(readGroupAdmin());
@@ -70,50 +85,79 @@ public class UpdateId extends Command {
         }
     }
 
-    private Coordinates readCoordinates() {
+    private Coordinates readCoordinates(Coordinates current) {
+        Long x = current.getX();
+        Long y = current.getY();
+
+        // Ввод X
         while (true) {
             try {
-                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату X (максимальное значение 648) > ");
+                System.out.print("Введите координату X (макс. 648, текущее: " + x + ") или нажмите Enter, чтобы оставить > ");
+                String xInput = commandManager.getScanner().nextLine().trim();
+                if (xInput.isEmpty()) {
+                    break; // Оставляем текущее значение X
                 }
-                Long x = Long.parseLong(commandManager.getScanner().nextLine().trim());
-                
-                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату Y > ");
-                }
-                Long y = Long.parseLong(commandManager.getScanner().nextLine().trim());
-                
-                return new Coordinates(x, y);
-            } catch (NumberFormatException e) {
-                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
-                    System.out.println("Ошибка! Введите корректные числа");
+                x = Long.parseLong(xInput);
+                if (x > 648) {
+                    System.out.println("Ошибка! X не может быть больше 648");
                     continue;
                 }
-                throw e;
+                break; // Успешный ввод
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка! Введите корректное число для X");
             }
         }
-    }
 
-    private long readStudentsCount() {
+        // Ввод Y
         while (true) {
             try {
-                System.out.print("Введите количество студентов > ");
-                long count = Long.parseLong(commandManager.getScanner().nextLine().trim());
-                if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
-                return count;
+                System.out.print("Введите координату Y (текущее: " + y + ") или нажмите Enter, чтобы оставить > ");
+                String yInput = commandManager.getScanner().nextLine().trim();
+                if (yInput.isEmpty()) {
+                    break; // Оставляем текущее значение Y
+                }
+                y = Long.parseLong(yInput);
+                break; // Успешный ввод
+            } catch (NumberFormatException e) {
+                System.out.println("Ошибка! Введите корректное число для Y");
+            }
+        }
+
+        return new Coordinates(x, y);
+    }
+
+    private long readStudentsCount(long currentCount) {
+        while (true) {
+            try {
+                System.out.print("Введите количество студентов (текущее: " + currentCount + ") или нажмите Enter, чтобы оставить > ");
+                String input = commandManager.getScanner().nextLine().trim();
+                if (input.isEmpty()) {
+                    return currentCount; // Сохраняем текущее значение
+                }
+                long count = Long.parseLong(input);
+                if (count <= 0) {
+                    System.out.println("Количество должно быть больше 0");
+                    continue;
+                }
+                return count; // Успешный ввод
             } catch (NumberFormatException e) {
                 System.out.println("Ошибка! Введите корректное число");
-            } catch (IllegalArgumentException e) {
-                System.out.println(e.getMessage());
             }
         }
     }
 
-    private int readExpelledStudents() {
+    private int readExpelledStudents(int currentExpelled) {
         while (true) {
             try {
-                System.out.print("Введите количество отчисленных студентов > ");
-                int count = Integer.parseInt(commandManager.getScanner().nextLine().trim());
+                if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                    System.out.print("Введите количество отчисленных студентов (текущее: " + currentExpelled + ")  or (null чтобы оставить значение)> ");
+                }
+                String input = commandManager.getScanner().nextLine().trim();
+                if (input.isEmpty()) {
+                    return currentExpelled;
+                }
+                int count = Integer.parseInt(input);
+
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -129,6 +173,7 @@ public class UpdateId extends Command {
             try {
                 System.out.print("Введите количество переведенных студентов > ");
                 int count = Integer.parseInt(commandManager.getScanner().nextLine().trim());
+
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
