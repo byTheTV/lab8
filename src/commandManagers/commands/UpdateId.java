@@ -35,7 +35,7 @@ public class UpdateId extends Command {
             throw new IllegalArgumentException("Аргумент не может быть null");
         }
 
-        Long id;
+        long id;
         try {
             id = Long.parseLong((String) argument);
         } catch (NumberFormatException e) {
@@ -52,39 +52,26 @@ public class UpdateId extends Command {
             StudyGroup newGroup = new StudyGroup();
             newGroup.setId(oldGroup.getId());
 
-            String nameInput = inputReader.readName();
-            newGroup.setName(nameInput.isEmpty() ? oldGroup.getName() : nameInput);
+            inputReader.SetFieldWithRetry(newGroup , () -> newGroup.setName(inputReader.readName(oldGroup.getName())), "название группы");
 
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setCoordinates(inputReader.readCoordinates(oldGroup.getCoordinates())), "координаты");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setCoordinates(inputReader.readCoordinates()), "координаты");
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setStudentsCount(inputReader.readStudentsCount(oldGroup.getStudentsCount())), "количество студентов");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setStudentsCount(inputReader.readStudentsCount()), "количество студентов");
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setExpelledStudents(inputReader.readExpelledStudents(oldGroup.getExpelledStudents())), "отчисленные студенты");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setExpelledStudents(inputReader.readExpelledStudents()), "отчисленные студенты");
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setTransferredStudents(inputReader.readTransferredStudents(oldGroup.getTransferredStudents())), "переведенные студенты");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setTransferredStudents(inputReader.readTransferredStudents()), "переведенные студенты");
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setFormOfEducation(inputReader.readFormOfEducation(oldGroup.getFormOfEducation())), "форма обучения");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setFormOfEducation(inputReader.readFormOfEducation()), "форма обучения");
+            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setGroupAdmin(inputReader.readGroupAdmin(oldGroup.getGroupAdmin())), "администратор группы");
 
-            SetFieldWithRetry(newGroup, () -> newGroup.setGroupAdmin(inputReader.readGroupAdmin()), "администратор группы");
-
-            collectionManager.updateById(id.intValue(), newGroup);
+            collectionManager.updateById((int) id, newGroup);
             System.out.println("Элемент успешно обновлен");
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
             if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
                 execute(); // Повторный вызов в случае ошибки в CLI
-            }
-        }
-    }
-
-    public void SetFieldWithRetry(StudyGroup studyGroup, Runnable setter, String fieldName) {
-        while (true) {
-            try {
-                setter.run();
-                break; // Выходим из цикла, если setter выполнился успешно
-            } catch (Exception e) {
-                System.out.println("Ошибка в поле '" + fieldName + "': " + e.getMessage() + ". Попробуйте снова.");
             }
         }
     }

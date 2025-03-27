@@ -12,9 +12,9 @@ import models.StudyGroup;
  * Provides methods for adding, removing, and manipulating the collection.
  */
 public class StudyGroupCollectionManager {
-    private ArrayDeque<StudyGroup> collection;
-    private LocalDateTime creationDate;
-    private String collectionType;
+    private final ArrayDeque<StudyGroup> collection;
+    private final LocalDateTime creationDate;
+    private final String collectionType;
     private String dataFile;
 
     public StudyGroupCollectionManager() {
@@ -46,10 +46,6 @@ public class StudyGroupCollectionManager {
     public boolean load() {
         try {
             Collection<StudyGroup> loadedGroups = XMLReader.readStudyGroupCollection(dataFile);
-            if (loadedGroups == null) {
-                System.err.println("Не удалось загрузить коллекцию: результат null");
-                return false;
-            }
             collection.clear();
             collection.addAll(loadedGroups);
             return true;
@@ -67,7 +63,7 @@ public class StudyGroupCollectionManager {
      */
     public boolean saveCollection() {
         try {
-            XMLWriter.writeStudyGroupCollection((Collection<StudyGroup>) collection, dataFile);
+            XMLWriter.writeStudyGroupCollection(collection, dataFile);
             return true;
         } catch (Exception e) {
             System.err.println("Ошибка при сохранении коллекции: " + e.getMessage());

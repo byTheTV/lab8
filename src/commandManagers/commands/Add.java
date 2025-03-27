@@ -34,20 +34,19 @@ public class Add extends Command {
         try {
             StudyGroup studyGroup = new StudyGroup();
 
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName()), "название группы");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates()), "координаты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount()), "количество студентов");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents()), "отчисленные студенты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents()), "переведенные студенты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
 
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation()), "форма обучения");
-
-            SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin()), "администратор группы");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
 
             collectionManager.add(studyGroup);
             System.out.println("Элемент успешно добавлен в коллекцию");
@@ -55,17 +54,6 @@ public class Add extends Command {
             System.out.println("Ошибка: " + e.getMessage());
             if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
                 execute();
-            }
-        }
-    }
-
-    public void SetFieldWithRetry(StudyGroup studyGroup, Runnable setter, String fieldName) {
-        while (true) {
-            try {
-                setter.run();
-                break; // Выходим из цикла, если setter выполнился успешно
-            } catch (Exception e) {
-                System.out.println("Ошибка в поле '" + fieldName + "': " + e.getMessage() + ". Попробуйте снова.");
             }
         }
     }

@@ -24,32 +24,48 @@ public class InputReader {
         }
     }
 
-    public String readName() {
+    public String readName(String defaultValue) {
         if (mode == CommandMode.CLI_UserMode) {
-            System.out.print("Введите название группы > ");
+            String prompt = "Введите название группы";
+            if (defaultValue != null) prompt += " (пробел для '" + defaultValue + "')";
+            System.out.print(prompt + " > ");
         }
-        return scanner.nextLine().trim();
+        String input = scanner.nextLine().trim();
+        return (defaultValue != null && input.isEmpty()) ? defaultValue : input;
     }
 
-
-    public Coordinates readCoordinates() {
+    public Coordinates readCoordinates(Coordinates defaultValue) {
         while (true) {
             try {
+                Long x, y;
+
+                // Обработка X
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату X (максимальное значение 648) > ");
+                    String xPrompt = "Введите координату X (максимальное значение 648)";
+                    if (defaultValue != null) xPrompt += " (пробел для " + defaultValue.getX() + ")";
+                    System.out.print(xPrompt + " > ");
                 }
-                Long x = Long.parseLong(scanner.nextLine().trim());
+                String xInput = scanner.nextLine().trim();
+                x = (defaultValue != null && xInput.isEmpty())
+                        ? defaultValue.getX()
+                        : Long.parseLong(xInput);
                 if (x > 648) throw new IllegalArgumentException("X не может быть больше 648");
 
+                // Обработка Y
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату Y > ");
+                    String yPrompt = "Введите координату Y";
+                    if (defaultValue != null) yPrompt += " (пробел для " + defaultValue.getY() + ")";
+                    System.out.print(yPrompt + " > ");
                 }
-                Long y = Long.parseLong(scanner.nextLine().trim());
+                String yInput = scanner.nextLine().trim();
+                y = (defaultValue != null && yInput.isEmpty())
+                        ? defaultValue.getY()
+                        : Long.parseLong(yInput);
 
                 return new Coordinates(x, y);
             } catch (NumberFormatException e) {
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.println("Ошибка! Введите корректные числа");
+                    System.out.println(e.getMessage());
                 } else {
                     throw e;
                 }
@@ -63,13 +79,53 @@ public class InputReader {
         }
     }
 
-    public long readStudentsCount() {
+
+    public Long readStudentsCount(Long defaultValue) {
         while (true) {
             try {
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите количество студентов > ");
+                    String prompt = "Введите количество студентов";
+                    if (defaultValue != null) prompt += " (пробел для " + defaultValue + ")";
+                    System.out.print(prompt + " > ");
                 }
-                long count = Long.parseLong(scanner.nextLine().trim());
+                String input = scanner.nextLine().trim();
+                long count;
+                if (defaultValue != null && input.isEmpty()) {
+                    count = defaultValue; // Используем значение по умолчанию, если оно есть
+                } else {
+                    count = Long.parseLong(input); // Парсим введённое значение
+                }
+                if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
+                return count;
+
+            } catch (NumberFormatException e) {
+                if (mode == CommandMode.CLI_UserMode) {
+                    System.out.println("Ошибка! Введите корректное число");
+                } else {
+                    throw e;
+                }
+            } catch (IllegalArgumentException e) {
+                if (mode == CommandMode.CLI_UserMode) {
+                    System.out.println(e.getMessage());
+                } else {
+                    throw e;
+                }
+            }
+        }
+    }
+
+    public Integer readExpelledStudents(Integer defaultValue) {
+        while (true) {
+            try {
+                if (mode == CommandMode.CLI_UserMode) {
+                    String prompt = "Введите количество отчисленных студентов";
+                    if (defaultValue != null) prompt += " (пробел для " + defaultValue + ")";
+                    System.out.print(prompt + " > ");
+                }
+                String input = scanner.nextLine().trim();
+                int count = (defaultValue != null && input.isEmpty())
+                        ? defaultValue
+                        : Integer.parseInt(input);
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -88,13 +144,18 @@ public class InputReader {
         }
     }
 
-    public int readExpelledStudents() {
+    public Integer readTransferredStudents(Integer defaultValue) {
         while (true) {
             try {
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите количество отчисленных студентов > ");
+                    String prompt = "Введите количество переведенных студентов";
+                    if (defaultValue != null) prompt += " (пробел для " + defaultValue + ")";
+                    System.out.print(prompt + " > ");
                 }
-                int count = Integer.parseInt(scanner.nextLine().trim());
+                String input = scanner.nextLine().trim();
+                int count = (defaultValue != null && input.isEmpty())
+                        ? defaultValue
+                        : Integer.parseInt(input);
                 if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
                 return count;
             } catch (NumberFormatException e) {
@@ -113,42 +174,24 @@ public class InputReader {
         }
     }
 
-    public int readTransferredStudents() {
-        while (true) {
-            try {
-                if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите количество переведенных студентов > ");
-                }
-                int count = Integer.parseInt(scanner.nextLine().trim());
-                if (count <= 0) throw new IllegalArgumentException("Количество должно быть больше 0");
-                return count;
-            } catch (NumberFormatException e) {
-                if (mode == CommandMode.CLI_UserMode) {
-                    System.out.println("Ошибка! Введите корректное число");
-                } else {
-                    throw e;
-                }
-            } catch (IllegalArgumentException e) {
-                if (mode == CommandMode.CLI_UserMode) {
-                    System.out.println(e.getMessage());
-                } else {
-                    throw e;
-                }
-            }
-        }
-    }
 
-    public FormOfEducation readFormOfEducation() {
+    public FormOfEducation readFormOfEducation(FormOfEducation defaultValue) {
         while (true) {
             try {
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.println("Выберите форму обучения:");
+                    String prompt = "Выберите форму обучения";
+                    if (defaultValue != null) prompt += " (пробел для " + defaultValue + "):";
+                    else prompt += ":";
+                    System.out.println(prompt);
                     for (FormOfEducation form : FormOfEducation.values()) {
                         System.out.println(form.ordinal() + 1 + " — " + form);
                     }
                     System.out.print("> ");
                 }
                 String input = scanner.nextLine().trim();
+                if (defaultValue != null && input.isEmpty()) {
+                    return defaultValue;
+                }
                 try {
                     int choice = Integer.parseInt(input);
                     if (choice > 0 && choice <= FormOfEducation.values().length) {
@@ -166,55 +209,82 @@ public class InputReader {
         }
     }
 
-    public Person readGroupAdmin() {
+    public Person readGroupAdmin(Person defaultValue) {
         try {
             Person admin = new Person();
             if (mode == CommandMode.CLI_UserMode) {
-                System.out.print("Введите имя администратора > ");
+                String namePrompt = "Введите имя администратора";
+                if (defaultValue != null && defaultValue.getName() != null) {
+                    namePrompt += " (пробел для '" + defaultValue.getName() + "')";
+                }
+                System.out.print(namePrompt + " > ");
             }
-            admin.setName(scanner.nextLine().trim());
+            String nameInput = scanner.nextLine().trim();
+            if (defaultValue != null && nameInput.equals("") && defaultValue.getName() != null) {
+                admin.setName(defaultValue.getName());
+            } else {
+                admin.setName(nameInput);
+            }
 
             if (mode == CommandMode.CLI_UserMode) {
-                System.out.println("Введите дату рождения (в формате YYYY-MM-DD или пустую строку) > ");
+                String birthdayPrompt = "Введите дату рождения (в формате YYYY-MM-DD или пустую строку)";
+                if (defaultValue != null && defaultValue.getBirthday() != null) {
+                    birthdayPrompt += " (пробел для " + defaultValue.getBirthday() + ")";
+                }
+                System.out.println(birthdayPrompt + " > ");
             }
             String birthdayStr = scanner.nextLine().trim();
-            if (!birthdayStr.isEmpty()) {
+            if (defaultValue != null && birthdayStr.equals("") && defaultValue.getBirthday() != null) {
+                admin.setBirthday(defaultValue.getBirthday());
+            } else if (!birthdayStr.isEmpty()) {
                 admin.setBirthday(LocalDate.parse(birthdayStr));
             }
 
             if (mode == CommandMode.CLI_UserMode) {
-                System.out.println("Введите номер паспорта (не более 26 символов или пустую строку) > ");
+                String passportPrompt = "Введите номер паспорта (не более 26 символов или пустую строку)";
+                if (defaultValue != null && defaultValue.getPassportID() != null) {
+                    passportPrompt += " (пробел для '" + defaultValue.getPassportID() + "')";
+                }
+                System.out.println(passportPrompt + " > ");
             }
             String passportID = scanner.nextLine().trim();
-            if (!passportID.isEmpty()) {
+            if (defaultValue != null && passportID.equals("") && defaultValue.getPassportID() != null) {
+                admin.setPassportID(defaultValue.getPassportID());
+            } else if (!passportID.isEmpty()) {
                 admin.setPassportID(passportID);
             }
 
-            admin.setEyeColor(readEyeColor());
-            admin.setLocation(readLocation());
+            admin.setEyeColor(readEyeColor(defaultValue != null ? defaultValue.getEyeColor() : null));
+            admin.setLocation(readLocation(defaultValue != null ? defaultValue.getLocation() : null));
 
             return admin;
         } catch (IllegalArgumentException e) {
             if (mode == CommandMode.CLI_UserMode) {
                 System.out.println("Ошибка: " + e.getMessage());
-                return readGroupAdmin(); // Рекурсивный вызов для повторного ввода
+                return readGroupAdmin(defaultValue); // Рекурсивный вызов
             } else {
                 throw e;
             }
         }
     }
 
-    public Color readEyeColor() {
+    public Color readEyeColor(Color defaultValue) {
         while (true) {
             try {
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.println("Выберите цвет глаз:");
+                    String prompt = "Выберите цвет глаз";
+                    if (defaultValue != null) prompt += " (пробел для " + defaultValue + "):";
+                    else prompt += ":";
+                    System.out.println(prompt);
                     for (Color color : Color.values()) {
                         System.out.println(color.ordinal() + 1 + " — " + color);
                     }
                     System.out.print("> ");
                 }
                 String input = scanner.nextLine().trim();
+                if (defaultValue != null && input.equals("")) {
+                    return defaultValue;
+                }
                 try {
                     int choice = Integer.parseInt(input);
                     if (choice > 0 && choice <= Color.values().length) {
@@ -232,23 +302,40 @@ public class InputReader {
         }
     }
 
-    public Location readLocation() {
+    public Location readLocation(Location defaultValue) {
         while (true) {
             try {
-                if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату X локации > ");
-                }
-                Float x = Float.parseFloat(scanner.nextLine().trim());
+                Float x, y, z;
 
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату Y локации > ");
+                    String xPrompt = "Введите координату X локации";
+                    if (defaultValue != null) xPrompt += " (пробел для " + defaultValue.getX() + ")";
+                    System.out.print(xPrompt + " > ");
                 }
-                Float y = Float.parseFloat(scanner.nextLine().trim());
+                String xInput = scanner.nextLine().trim();
+                x = (defaultValue != null && xInput.isEmpty())
+                        ? defaultValue.getX()
+                        : Float.parseFloat(xInput);
 
                 if (mode == CommandMode.CLI_UserMode) {
-                    System.out.print("Введите координату Z локации > ");
+                    String yPrompt = "Введите координату Y локации";
+                    if (defaultValue != null) yPrompt += " (пробел для " + defaultValue.getY() + ")";
+                    System.out.print(yPrompt + " > ");
                 }
-                Float z = Float.parseFloat(scanner.nextLine().trim());
+                String yInput = scanner.nextLine().trim();
+                y = (defaultValue != null && yInput.equals(""))
+                        ? defaultValue.getY()
+                        : Float.parseFloat(yInput);
+
+                if (mode == CommandMode.CLI_UserMode) {
+                    String zPrompt = "Введите координату Z локации";
+                    if (defaultValue != null) zPrompt += " (пробел для " + defaultValue.getZ() + ")";
+                    System.out.print(zPrompt + " > ");
+                }
+                String zInput = scanner.nextLine().trim();
+                z = (defaultValue != null && zInput.equals(""))
+                        ? defaultValue.getZ()
+                        : Float.parseFloat(zInput);
 
                 return new Location(x, y, z);
             } catch (NumberFormatException e) {

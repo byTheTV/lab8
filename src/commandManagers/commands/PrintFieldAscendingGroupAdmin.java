@@ -37,7 +37,7 @@ public class PrintFieldAscendingGroupAdmin extends Command {
         }
         
         // Сортировка по имени администратора
-        Collections.sort(admins, Comparator.comparing(Person::getName));
+        admins.sort(Comparator.comparing(Person::getName));
         System.out.println("Список GroupAdmin в порядке возрастания:");
         for (Person admin : admins) {
             System.out.println(admin);

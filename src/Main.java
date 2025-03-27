@@ -23,7 +23,7 @@ import java.nio.charset.StandardCharsets;
  * </p>
  *
  * @author T.V.
- * @version 1.0
+ *
  */
 public class Main {
 
@@ -60,6 +60,9 @@ public class Main {
             manager.initializeData(dataFile);
             boolean loadSuccess = manager.load();
             if (loadSuccess) {
+                System.out.println("""
+                        
+                        """);
                 System.out.println("\nКоллекция успешно загружена из файла: " + dataFile);
                 System.out.println("Информация о коллекции:");
                 System.out.println("Размер коллекции: " + manager.getSize());
@@ -69,7 +72,7 @@ public class Main {
             } else {
                 System.err.println("Ошибка: Не удалось загрузить коллекцию из файла: " + dataFile);
             }
-            
+
             // Передаём менеджер коллекции в CommandExecutor и запускаем выполнение команд в CLI режиме
             CommandExecutor executor = new CommandExecutor(manager);
             executor.startExecuting(System.in);
