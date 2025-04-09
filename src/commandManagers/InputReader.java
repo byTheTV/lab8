@@ -17,7 +17,7 @@ public class InputReader {
         while (true) {
             try {
                 setter.run();
-                break; // Выходим из цикла, если setter выполнился успешно
+                break;
             } catch (Exception e) {
                 System.out.println("Ошибка в поле '" + fieldName + "': " + e.getMessage() + ". Попробуйте снова.");
             }
@@ -220,7 +220,7 @@ public class InputReader {
                 System.out.print(namePrompt + " > ");
             }
             String nameInput = scanner.nextLine().trim();
-            if (defaultValue != null && nameInput.equals("") && defaultValue.getName() != null) {
+            if (defaultValue != null && nameInput.isEmpty() && defaultValue.getName() != null) {
                 admin.setName(defaultValue.getName());
             } else {
                 admin.setName(nameInput);
@@ -234,7 +234,7 @@ public class InputReader {
                 System.out.println(birthdayPrompt + " > ");
             }
             String birthdayStr = scanner.nextLine().trim();
-            if (defaultValue != null && birthdayStr.equals("") && defaultValue.getBirthday() != null) {
+            if (defaultValue != null && birthdayStr.isEmpty() && defaultValue.getBirthday() != null) {
                 admin.setBirthday(defaultValue.getBirthday());
             } else if (!birthdayStr.isEmpty()) {
                 admin.setBirthday(LocalDate.parse(birthdayStr));
@@ -248,7 +248,7 @@ public class InputReader {
                 System.out.println(passportPrompt + " > ");
             }
             String passportID = scanner.nextLine().trim();
-            if (defaultValue != null && passportID.equals("") && defaultValue.getPassportID() != null) {
+            if (defaultValue != null && passportID.isEmpty() && defaultValue.getPassportID() != null) {
                 admin.setPassportID(defaultValue.getPassportID());
             } else if (!passportID.isEmpty()) {
                 admin.setPassportID(passportID);
@@ -282,7 +282,7 @@ public class InputReader {
                     System.out.print("> ");
                 }
                 String input = scanner.nextLine().trim();
-                if (defaultValue != null && input.equals("")) {
+                if (defaultValue != null && input.isEmpty()) {
                     return defaultValue;
                 }
                 try {
@@ -323,7 +323,7 @@ public class InputReader {
                     System.out.print(yPrompt + " > ");
                 }
                 String yInput = scanner.nextLine().trim();
-                y = (defaultValue != null && yInput.equals(""))
+                y = (defaultValue != null && yInput.isEmpty())
                         ? defaultValue.getY()
                         : Float.parseFloat(yInput);
 
@@ -333,7 +333,7 @@ public class InputReader {
                     System.out.print(zPrompt + " > ");
                 }
                 String zInput = scanner.nextLine().trim();
-                z = (defaultValue != null && zInput.equals(""))
+                z = (defaultValue != null && zInput.isEmpty())
                         ? defaultValue.getZ()
                         : Float.parseFloat(zInput);
 

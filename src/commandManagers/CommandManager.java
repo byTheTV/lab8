@@ -47,7 +47,6 @@ public class CommandManager {
         commandMap.put("update_id", new UpdateId(collectionManager, scanner, this));
         commandMap.put("remove_by_id", new RemoveById(collectionManager));
         commandMap.put("clear", new Clear(collectionManager));
-        commandMap.put("save", new SaveCollection(collectionManager));
         commandMap.put("execute_script", new ExecuteScript(this));
         commandMap.put("exit", new Exit(collectionManager));
         commandMap.put("head", new Head(collectionManager));
@@ -107,17 +106,14 @@ public class CommandManager {
 
             command.execute();
         } catch (IllegalArgumentException | NullPointerException | NoSuchElementException e) {
-            // Обработка ошибок, связанных с аргументами
             System.err.println("Выполнение команды пропущено из-за неправильных предоставленных аргументов! (" + e.getMessage() + ")");
             if (currentMode == CommandMode.CLI_UserMode) {
                 throw new CommandInterruptedException(e);
             }
         } catch (BuildObjectException | UnknownCommandException e) {
-            // Обработка специфических исключений
-            System.err.println(e.getMessage()); // Выводим сообщение об ошибке
+            System.err.println(e.getMessage());
             if (currentMode == CommandMode.CLI_UserMode) {
-                // Не пробрасываем исключение повторно, чтобы избежать дублирования сообщений
-                return; // Завершаем выполнение
+                return;
             }
         } catch (Exception e) {
             // Обработка всех остальных исключений

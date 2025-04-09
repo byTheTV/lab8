@@ -32,12 +32,9 @@ public class CommandExecutor {
      * @param in поток ввода для считывания команд.
      */
     public void startExecuting(InputStream in) {
-        // Передаём уже существующий collectionManager в CommandManager
         try (Scanner scanner = new Scanner(in)) {
-            // Передаём уже существующий collectionManager в CommandManager
             CommandManager commandManager = new CommandManager(scanner, collectionManager);
             
-            // Вызываем команду help сразу при запуске, чтобы вывести список всех доступных команд
             if (commandManager.getCommandMap().containsKey("help")) {
                 try {
                     commandManager.getCommandMap().get("help").execute();

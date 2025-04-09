@@ -36,8 +36,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             System.setOut(new PrintStream(System.out, true, "UTF-8"));
-            // Проверка аргументов командной строки.
-            // Если имя файла не передано или передан пустой буфер, используем файл по умолчанию.
+
             String dataFile = "src/resourses/study_groups.xml";
             if (args.length < 1 || args[0].trim().isEmpty()) {
                 System.out.println("Имя файла не указано или передан пустой буфер. Используем файл по умолчанию: " + dataFile);
@@ -45,35 +44,30 @@ public class Main {
                 dataFile = args[0];
             }
             
-            // Добавляем вывод текущей директории для отладки
             System.out.println("Текущая рабочая директория: " + System.getProperty("user.dir"));
             
-            // Добавляем проверку существования файла
+            // Проверка существования файла
             java.io.File file = new java.io.File(dataFile);
             if (!file.exists()) {
                 System.err.println("Предупреждение: Файл не найден по пути: " + file.getAbsolutePath());
             }
             
-            // Создание менеджера коллекции и загрузка данных из файла
             StudyGroupCollectionManager manager = new StudyGroupCollectionManager();
             System.out.println("Попытка инициализации данных из файла: " + dataFile);
             manager.initializeData(dataFile);
             boolean loadSuccess = manager.load();
             if (loadSuccess) {
-                System.out.println("""
-                        
-                        """);
-                System.out.println("\nКоллекция успешно загружена из файла: " + dataFile);
-                System.out.println("Информация о коллекции:");
-                System.out.println("Размер коллекции: " + manager.getSize());
-                System.out.println("Тип коллекции: " + manager.getCollectionType());
-                System.out.println("Дата создания: " + manager.getCreationDate());
-                System.out.println("Среднее число переведенных студентов: " + manager.getAverageOfTransferredStudents());
+                System.out.println("\nКоллекция успешно загружена из файла: " + dataFile +
+                        "\nИнформация о коллекции:" +
+                        "\nРазмер коллекции: " + manager.getSize() +
+                        "\nТип коллекции: " + manager.getCollectionType() +
+                        "\nДата создания: " + manager.getCreationDate() +
+                        "\nСреднее число переведенных студентов: " + manager.getAverageOfTransferredStudents());
             } else {
                 System.err.println("Ошибка: Не удалось загрузить коллекцию из файла: " + dataFile);
             }
 
-            // Передаём менеджер коллекции в CommandExecutor и запускаем выполнение команд в CLI режиме
+            // запускаем выполнение команд в CLI режиме
             CommandExecutor executor = new CommandExecutor(manager);
             executor.startExecuting(System.in);
             
