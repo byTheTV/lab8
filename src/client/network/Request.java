@@ -6,18 +6,11 @@ import client.models.*;
 
 
 
-public class Request implements Serializable {
+public abstract class Request implements Serializable {
     private final String name;
-    private final StudyGroup studyGroup;
 
     public Request(String name) {
         this.name = name;
-        this.studyGroup = null;
-    }
-
-    public Request(String name, StudyGroup studyGroup) {
-        this.name = name;
-        this.studyGroup = studyGroup;
     }
 
     public String getName() {

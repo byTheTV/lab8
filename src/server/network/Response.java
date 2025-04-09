@@ -3,7 +3,7 @@ package server.network;
 import java.io.Serializable;
 import java.util.Objects;
 
-public class Response implements Serializable {
+public abstract class Response implements Serializable {
     private final String name;
     private final String error;
 
