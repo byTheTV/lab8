@@ -20,12 +20,11 @@ public class StudyGroupCollectionUtils {
      * @return Map with form of education as key and count as value
      */
     public static Map<String, Integer> groupCountingByFormOfEducation(ArrayDeque<StudyGroup> collection) {
-        Map<String, Integer> counts = new HashMap<>();
-        for (StudyGroup group : collection) {
-            String formOfEducation = group.getFormOfEducation().toString();
-            counts.put(formOfEducation, counts.getOrDefault(formOfEducation, 0) + 1);
-        }
-        return counts;
+        return collection.stream()
+                .collect(Collectors.groupingBy(
+                        group -> group.getFormOfEducation().toString(),
+                        Collectors.summingInt(e -> 1)
+                ));
     }
 
     /**

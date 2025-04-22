@@ -1,10 +1,10 @@
-package fileLogic;
+package Client.fileLogic;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Collection;
-import models.*;
+import Common.models.*;
 
 public class XMLWriter {
 

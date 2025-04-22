@@ -1,7 +1,7 @@
 package Client.commandManagers.commands;
 
 import Client.commandManagers.*;
-import exceptions.RecursiveScriptException;
+import Client.exceptions.RecursiveScriptException;
 
 import java.io.File;
 import java.io.FileNotFoundException;

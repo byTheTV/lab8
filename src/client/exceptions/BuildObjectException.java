@@ -1,4 +1,4 @@
-package exceptions;
+package Client.exceptions;
 
 /**
  * An exception that is thrown when an object cannot be built.

@@ -1,4 +1,4 @@
-package exceptions;
+package Client.exceptions;
 
 /**
  * Provides a simple exception, indicates that command isn't found in manager

@@ -1,6 +1,6 @@
 package Client.commandManagers;
 
-import exceptions.BuildObjectException;
+import Client.exceptions.BuildObjectException;
 
 /**
  * Интерфейс для реализации команд.

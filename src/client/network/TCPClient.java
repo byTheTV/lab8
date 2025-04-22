@@ -1,19 +1,23 @@
 package Client.network;
 
-import Common.requests.Request;
-
-import Common.responses.Response;
-import java.net.*;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
+import Common.requests.Request;
+import Common.responses.Response;
+
 public class TCPClient {
     private InetSocketAddress addr;
     private SocketChannel socketChannel;
-    private static final int MAX_TIMEOUT = 5000; //MS
+    private static final int MAX_TIMEOUT = 5000; // MS
     private static final int MAX_ATTEMPTS = 3; // attempts to connect
 
     public TCPClient(InetAddress addr, int port) throws IOException {
@@ -21,9 +25,9 @@ public class TCPClient {
         initializeConnection();
     }
 
-    private void initializeConnection() throws IOException{
+    private void initializeConnection() throws IOException {
         int attempts = 0;
-        while (attempts < MAX_ATTEMPTS){
+        while (attempts < MAX_ATTEMPTS) {
             try {
                 socketChannel = SocketChannel.open();
                 socketChannel.configureBlocking(false);
@@ -34,12 +38,12 @@ public class TCPClient {
                     if (System.currentTimeMillis() - startTime > MAX_TIMEOUT) {
                         throw new IOException("Connection timeout");
                     }
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(1000);
                 }
                 return;
-            } catch (IOException | InterruptedException e){
+            } catch (IOException | InterruptedException e) {
                 attempts++;
-                if(attempts == MAX_ATTEMPTS){
+                if (attempts == MAX_ATTEMPTS) {
                     throw new IOException("Failed to connect");
                 }
                 System.err.println("Connection failed, retrying...");
@@ -49,11 +53,18 @@ public class TCPClient {
                     Thread.currentThread().interrupt(); // restore interrupted status
                     throw new IOException("Thread interrupted during retry", ie);
                 }
-
             }
         }
     }
 
+    /**
+     * Проверяет, активно ли соединение с сервером.
+     *
+     * @return true, если канал открыт и соединение установлено, иначе false
+     */
+    public boolean isConnected() {
+        return socketChannel != null && socketChannel.isOpen() && socketChannel.isConnected();
+    }
 
     public void sendRequest(Request request) throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
@@ -76,7 +87,6 @@ public class TCPClient {
         ObjectInputStream ois = new ObjectInputStream(bais);
         return (Response) ois.readObject();
     }
-
 
     public void close() {
         try {

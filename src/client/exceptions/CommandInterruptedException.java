@@ -1,4 +1,4 @@
-package exceptions;
+package Client.exceptions;
 
 /**
  * An exception that represents an interruption in the execution of a command.

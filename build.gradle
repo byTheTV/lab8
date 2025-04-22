@@ -1,37 +1,32 @@
 plugins {
     id 'java'
+    id 'application'
 }
+
+group 'org.example'
+version '1.0-SNAPSHOT'
 
 repositories {
     mavenCentral()
 }
 
+dependencies {
+    // Укажите зависимости, если они есть (например, для работы с сетью)
+    // implementation 'some-library:1.0'
+}
 
+application {
+    mainClass = 'Client.Client'  // Главный класс для запуска
+}
 
 sourceSets {
     main {
         java {
-            srcDirs = ['src'] // Указываем папку с исходными файлами
+            srcDirs = ['src']  // Указываем, где исходный код
         }
     }
 }
 
-compileJava.options.encoding = 'UTF-8'
-
 tasks.withType(JavaCompile) {
-    options.encoding = 'UTF-8'
-}
-
-
-task runProgram(type: JavaExec) {
-    group = 'Execution'
-    description = 'Запуск основной программы'
-    mainClass = 'Main' 
-    classpath = sourceSets.main.runtimeClasspath
-    standardInput = System.in // Передаем ввод пользователя в программу
-
-    // Зависимость от задачи сборки
-    dependsOn 'build'
-    systemProperty 'file.encoding', 'UTF-8'
-    jvmArgs '-Dfile.encoding=UTF-8'
+    options.encoding = 'UTF-8'  // Устанавливаем кодировку
 }

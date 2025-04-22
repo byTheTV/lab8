@@ -4,7 +4,7 @@ import java.io.InputStream;
 import java.util.Scanner;
 
 import Client.network.TCPClient;
-import exceptions.BuildObjectException;
+import Client.exceptions.BuildObjectException;
 
 
 /**
@@ -12,13 +12,13 @@ import exceptions.BuildObjectException;
  * направленных на управление коллекцией {@code StudyGroup}.
  */
 public class CommandExecutor {
-
+    private TCPClient client;
     /**
      * Конструктор для создания исполнитель команд.
      *
      */
-    public CommandExecutor() {
-
+    public CommandExecutor(TCPClient client) {
+        this.client = client;
     }
 
     /**
@@ -28,7 +28,7 @@ public class CommandExecutor {
      * @param in поток ввода для считывания команд.
      */
 
-    public void startExecuting(InputStream in, TCPClient client) {
+    public void startExecuting(InputStream in) {
         try (Scanner scanner = new Scanner(in)) {
             CommandManager commandManager = new CommandManager(scanner, client);
             

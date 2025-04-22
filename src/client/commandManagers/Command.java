@@ -1,6 +1,6 @@
 package Client.commandManagers;
 
-import exceptions.BuildObjectException;
+import Client.exceptions.BuildObjectException;
 
 /**
  Abstract class representing a command that can be executed in the program.

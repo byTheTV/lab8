@@ -2,10 +2,11 @@ package Client.commandManagers;
 
 import Client.commandManagers.commands.*;
 import Client.network.TCPClient;
-import exceptions.BuildObjectException;
-import exceptions.CommandInterruptedException;
-import exceptions.UnknownCommandException;
+import Client.exceptions.BuildObjectException;
+import Client.exceptions.CommandInterruptedException;
+import Client.exceptions.UnknownCommandException;
 import java.util.*;
+
 
 /**
  The CommandManager class is responsible for managing all available commands in the application.

@@ -1,4 +1,4 @@
-package fileLogic;
+package Client.fileLogic;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,12 +7,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Scanner;
-import models.Color;
-import models.Coordinates;
-import models.FormOfEducation;
-import models.Location;
-import models.Person;
-import models.StudyGroup;
+import Common.models.Color;
+import Common.models.Coordinates;
+import Common.models.FormOfEducation;
+import Common.models.Location;
+import Common.models.Person;
+import Common.models.StudyGroup;
 
 public class XMLReader {
 
