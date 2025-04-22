@@ -3,15 +3,15 @@ package Common.responses;
 import java.util.List;
 
 public class ExecuteScriptResponse extends Response {
-    private final List<String> executionResults;
+    private final List<String> results;
 
-    public ExecuteScriptResponse(List<String> executionResults, String error) {
-        super("ExecuteScript", error);
-        this.executionResults = executionResults;
+    public ExecuteScriptResponse(List<String> results, String error) {
+        super("execute_script", error);
+        this.results = results;
     }
 
-    public List<String> getExecutionResults() {
-        return executionResults;
+    public List<String> getResults() {
+        return results;
     }
 
     @Override
@@ -21,7 +21,7 @@ public class ExecuteScriptResponse extends Response {
         }
         StringBuilder sb = new StringBuilder();
         sb.append("Результаты выполнения скрипта:\n");
-        executionResults.forEach(result -> sb.append(result).append("\n"));
+        results.forEach(result -> sb.append(result).append("\n"));
         return sb.toString();
     }
 } 

@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import Common.models.StudyGroup;
 import Common.requests.AddRequest;
+import Common.requests.ExecuteScriptRequest;
 import Common.requests.RemoveByIdRequest;
 import Common.requests.RemoveLowerRequest;
 import Common.requests.Request;
@@ -14,6 +15,7 @@ import Common.requests.UpdateIdRequest;
 import Common.responses.AddResponse;
 import Common.responses.AverageOfTransferredStudentsResponse;
 import Common.responses.ClearResponse;
+import Common.responses.ExecuteScriptResponse;
 import Common.responses.GroupCountingByFormOfEducationResponse;
 import Common.responses.HeadResponse;
 import Common.responses.HelpResponse;
@@ -57,17 +59,16 @@ public class ServerRequestHandler implements RequestHandler {
             }
         });
 
-/*
         requestHandlers.put("execute_script", request -> {
             ExecuteScriptRequest scriptRequest = (ExecuteScriptRequest) request;
             try {
-                List<String> results = collectionManager.executeScript(scriptRequest.getScriptPath());
-                return new ExecuteScriptResponse(results, null);
+                String result = collectionManager.executeCommand(scriptRequest.getCommand(), scriptRequest.getArgument());
+                return new ExecuteScriptResponse(List.of(result), null);
             } catch (Exception e) {
                 return new ExecuteScriptResponse(null, e.getMessage());
             }
         });
-*/
+
         requestHandlers.put("group_counting_by_form_of_education", request -> {
             try {
                 Map<String, Integer> counts = collectionManager.groupCountingByFormOfEducation();
@@ -160,7 +161,11 @@ public class ServerRequestHandler implements RequestHandler {
 
         requestHandlers.put("show", request -> {
             try {
-                return new ShowResponse(collectionManager.show(), null);
+                List<StudyGroup> groups = collectionManager.show();
+                if (groups.isEmpty()) {
+                    return new ShowResponse(null, "Коллекция пуста");
+                }
+                return new ShowResponse(groups, null);
             } catch (Exception e) {
                 return new ShowResponse(null, e.getMessage());
             }

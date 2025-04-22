@@ -13,12 +13,10 @@ import Client.network.TCPClient;
 
 public class UpdateId extends NetworkCommand {
     private final CommandManager commandManager;
-    private final InputReader inputReader;
 
     public UpdateId(Scanner scanner, CommandManager commandManager, TCPClient tcpClient) {
         super(true, tcpClient);
         this.commandManager = commandManager;
-        this.inputReader = new InputReader(scanner, commandManager.getCurrentMode());
     }
 
     @Override
@@ -36,14 +34,25 @@ public class UpdateId extends NetworkCommand {
         try {
             Long id = Long.parseLong((String) getArgument());
             StudyGroup studyGroup = new StudyGroup();
+            InputReader inputReader = new InputReader(commandManager.getScanner(), commandManager.getCurrentMode());
 
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
+            if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
+            }else {
+                studyGroup.setName(inputReader.readName(null));
+                studyGroup.setCoordinates(inputReader.readCoordinates(null));
+                studyGroup.setStudentsCount(inputReader.readStudentsCount(null));
+                studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null));
+                studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null));
+                studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null));
+                studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null));
+            }
 
             UpdateIdRequest request = new UpdateIdRequest(id, studyGroup);
             UpdateIdResponse response = (UpdateIdResponse) sendAndReceive(request);

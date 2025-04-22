@@ -14,7 +14,7 @@ import Client.network.TCPClient;
  * По умолчанию используется localhost:5555.
  * </p>
  *
- * @author Your Name
+ * @author T.V.
  */
 public class Client {
     /**

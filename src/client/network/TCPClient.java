@@ -18,6 +18,7 @@ public class TCPClient {
     private InetSocketAddress addr;
     private SocketChannel socketChannel;
     private static final int MAX_TIMEOUT = 30000; // Increased timeout to 30 seconds
+
     private static final int MAX_ATTEMPTS = 3;
     private static final int READ_TIMEOUT = 10000; // 10 seconds for read operations
 
@@ -39,8 +40,9 @@ public class TCPClient {
                     if (System.currentTimeMillis() - startTime > MAX_TIMEOUT) {
                         throw new IOException("Connection timeout");
                     }
-                    TimeUnit.MILLISECONDS.sleep(100);
+                    TimeUnit.MILLISECONDS.sleep(10000);
                 }
+                TimeUnit.SECONDS.sleep(5);
                 return;
             } catch (IOException | InterruptedException e) {
                 attempts++;

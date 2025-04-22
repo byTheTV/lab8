@@ -11,20 +11,17 @@ import Common.requests.AddRequest;
 import Client.network.TCPClient;
 import Common.responses.AddResponse;
 
-
 public class Add extends NetworkCommand {
     private final CommandManager commandManager;
-    private final InputReader inputReader;
 
     public Add(Scanner scanner, CommandManager commandManager, TCPClient tcpClient) {
         super(false, tcpClient);
         this.commandManager = commandManager;
-        this.inputReader = new InputReader(scanner, commandManager.getCurrentMode());
     }
 
     @Override
     public String getName() {
-        return "add ";
+        return "add";
     }
 
     @Override
@@ -36,14 +33,27 @@ public class Add extends NetworkCommand {
     public void execute() {
         try {
             StudyGroup studyGroup = new StudyGroup();
+            InputReader inputReader = new InputReader(commandManager.getScanner(), commandManager.getCurrentMode());
 
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
-            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
+            if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
+                // Интерактивный режим с повторными попытками
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
+                inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
+            } else {
+                // Режим скрипта: чтение без повторных попыток
+                studyGroup.setName(inputReader.readName(null));
+                studyGroup.setCoordinates(inputReader.readCoordinates(null));
+                studyGroup.setStudentsCount(inputReader.readStudentsCount(null));
+                studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null));
+                studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null));
+                studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null));
+                studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null));
+            }
 
             AddRequest request = new AddRequest(studyGroup);
             AddResponse response = (AddResponse) sendAndReceive(request);
@@ -58,14 +68,15 @@ public class Add extends NetworkCommand {
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
             if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
-                execute();
+                execute(); // Повтор только в CLI
+            } else {
+                throw e; // В скрипте прерываем выполнение
             }
         }
     }
 
     @Override
     public boolean checkArgument(Object argument) {
-        return true;
+        return true; // Команда add не принимает аргументов
     }
 }
-

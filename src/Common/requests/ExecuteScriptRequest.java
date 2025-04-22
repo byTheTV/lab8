@@ -1,19 +1,23 @@
 package Common.requests;
 
-
 import java.util.Objects;
 
-
 public class ExecuteScriptRequest extends Request {
-    private final String fileName;
+    private final String command;
+    private final String argument;
 
-    public ExecuteScriptRequest(String fileName) {
+    public ExecuteScriptRequest(String command, String argument) {
         super("execute_script");
-        this.fileName = fileName;
+        this.command = command;
+        this.argument = argument;
     }
 
-    public String getFileName() {
-        return fileName;
+    public String getCommand() {
+        return command;
+    }
+
+    public String getArgument() {
+        return argument;
     }
 
     @Override
@@ -22,11 +26,12 @@ public class ExecuteScriptRequest extends Request {
         if (!(o instanceof ExecuteScriptRequest)) return false;
         if (!super.equals(o)) return false;
         ExecuteScriptRequest that = (ExecuteScriptRequest) o;
-        return Objects.equals(fileName, that.fileName);
+        return Objects.equals(command, that.command) &&
+                Objects.equals(argument, that.argument);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), fileName);
+        return Objects.hash(super.hashCode(), command, argument);
     }
 }

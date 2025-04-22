@@ -221,4 +221,83 @@ public class StudyGroupCollectionManager {
     public double averageOfTransferredStudents() {
         return StudyGroupCollectionUtils.averageOfTransferredStudents(collection);
     }
+
+    /**
+     * Executes a single command
+     * @param command the command to execute
+     * @param argument the command argument (if any)
+     * @return result of command execution
+     */
+    public String executeCommand(String command, String argument) {
+        try {
+            switch (command) {
+                case "add":
+                    // Здесь нужно реализовать создание StudyGroup из аргументов
+                    return "Команда add выполнена";
+                case "clear":
+                    clear();
+                    return "Коллекция очищена";
+                case "show":
+                    return to_string();
+                case "info":
+                    return String.format("Тип коллекции: %s\nРазмер: %d\nДата создания: %s",
+                            collectionType, getSize(), creationDate);
+                case "help":
+                    return "Доступные команды: add, clear, show, info, help";
+                case "remove_by_id":
+                    if (argument == null) {
+                        return "Ошибка: не указан ID для удаления";
+                    }
+                    try {
+                        long id = Long.parseLong(argument);
+                        if (removeById(id)) {
+                            return "Элемент с ID " + id + " успешно удален";
+                        } else {
+                            return "Элемент с ID " + id + " не найден";
+                        }
+                    } catch (NumberFormatException e) {
+                        return "Ошибка: ID должен быть числом";
+                    }
+                case "remove_head":
+                    StudyGroup head = removeHead();
+                    if (head != null) {
+                        return "Первый элемент коллекции удален:\n" + head;
+                    } else {
+                        return "Коллекция пуста";
+                    }
+                case "remove_lower":
+                    if (argument == null) {
+                        return "Ошибка: не указан ID для сравнения";
+                    }
+                    try {
+                        long id = Long.parseLong(argument);
+                        StudyGroup targetGroup = getById(id);
+                        if (targetGroup == null) {
+                            return "Элемент с ID " + id + " не найден";
+                        }
+                        int count = removeLower(targetGroup);
+                        return "Удалено элементов: " + count;
+                    } catch (NumberFormatException e) {
+                        return "Ошибка: ID должен быть числом";
+                    }
+                case "average_of_transferred_students":
+                    double average = averageOfTransferredStudents();
+                    return "Среднее количество переведенных студентов: " + average;
+                case "group_counting_by_form_of_education":
+                    Map<String, Integer> counts = groupCountingByFormOfEducation();
+                    StringBuilder sb = new StringBuilder("Количество групп по формам обучения:\n");
+                    counts.forEach((form, count) -> sb.append(form).append(": ").append(count).append("\n"));
+                    return sb.toString();
+                case "print_field_ascending_group_admin":
+                    List<String> adminNames = printFieldAscendingGroupAdmin();
+                    StringBuilder adminSb = new StringBuilder("Имена администраторов в порядке возрастания:\n");
+                    adminNames.forEach(name -> adminSb.append(name).append("\n"));
+                    return adminSb.toString();
+                default:
+                    return "Неизвестная команда: " + command;
+            }
+        } catch (Exception e) {
+            return "Ошибка при выполнении команды " + command + ": " + e.getMessage();
+        }
+    }
 } 
