@@ -1,10 +1,9 @@
 package Client;
 
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import Client.commandManagers.*;
+
+import Client.commandManagers.CommandExecutor;
 import Client.network.TCPClient;
 
 
@@ -28,7 +27,7 @@ public class Client {
 
             // Параметры подключения по умолчанию
             String host = "localhost";
-            int port = 5555;
+            int port = 55555;
 
             // Проверка аргументов командной строки
             if (args.length >= 1 && !args[0].trim().isEmpty()) {

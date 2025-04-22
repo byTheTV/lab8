@@ -9,7 +9,7 @@ public class Server {
     public static void main(String[] args) {
         StudyGroupCollectionManager collectionManager = new StudyGroupCollectionManager();
         ServerRequestHandler requestHandler = new ServerRequestHandler(collectionManager);
-        TCPServer server = new TCPServer(5555, requestHandler); // Порт 5555
+        TCPServer server = new TCPServer(55555, requestHandler); // Порт 5555
         try {
             server.start();
         } catch (IOException e) {

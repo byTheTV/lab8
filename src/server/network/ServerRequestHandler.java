@@ -88,6 +88,7 @@ public class ServerRequestHandler implements RequestHandler {
         requestHandlers.put("help", request -> {
             try {
                 Map<String, String> descriptions = collectionManager.getCommandDescriptions();
+
                 return new HelpResponse(descriptions, null);
             } catch (Exception e) {
                 return new HelpResponse(null, e.getMessage());

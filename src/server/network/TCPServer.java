@@ -1,125 +1,109 @@
 package Server.network;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import Common.requests.Request;
 import Common.responses.Response;
+import java.io.*;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.*;
+import java.util.concurrent.Executors;
 
 public class TCPServer {
     private final int port;
-    private final RequestHandler requestHandler;
-    private final ExecutorService executorService;
-    private ServerSocketChannel serverSocketChannel;
+    private final RequestHandler handler;
+    private ServerSocketChannel server;
     private Selector selector;
-    private boolean isRunning;
 
-    public TCPServer(int port, RequestHandler requestHandler) {
+    public TCPServer(int port, RequestHandler handler) {
         this.port = port;
-        this.requestHandler = requestHandler;
-        this.executorService = Executors.newFixedThreadPool(10);
+        this.handler = handler;
     }
 
     public void start() throws IOException {
-        serverSocketChannel = ServerSocketChannel.open();
-        serverSocketChannel.bind(new InetSocketAddress(port));
-        serverSocketChannel.configureBlocking(false);
-
+        server = ServerSocketChannel.open().bind(new InetSocketAddress(port));
+        server.configureBlocking(false);
         selector = Selector.open();
-        serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+        server.register(selector, SelectionKey.OP_ACCEPT);
 
-        isRunning = true;
-        System.out.println("Server started on port " + port);
-
-        while (isRunning) {
-            selector.select();
-            Set<SelectionKey> selectedKeys = selector.selectedKeys();
-            Iterator<SelectionKey> iterator = selectedKeys.iterator();
-
-            while (iterator.hasNext()) {
-                SelectionKey key = iterator.next();
-                iterator.remove();
-
-                if (key.isAcceptable()) {
-                    handleAccept(key);
-                } else if (key.isReadable()) {
-                    handleRead(key);
-                }
-            }
-        }
-    }
-
-    private void handleAccept(SelectionKey key) throws IOException {
-        ServerSocketChannel serverChannel = (ServerSocketChannel) key.channel();
-        SocketChannel clientChannel = serverChannel.accept();
-        clientChannel.configureBlocking(false);
-        clientChannel.register(selector, SelectionKey.OP_READ);
-    }
-
-    private void handleRead(SelectionKey key) {
-        SocketChannel clientChannel = (SocketChannel) key.channel();
-        executorService.submit(() -> {
-            try {
-                ByteBuffer buffer = ByteBuffer.allocate(1024);
-                clientChannel.read(buffer);
-                buffer.flip();
-
-                ByteArrayInputStream bais = new ByteArrayInputStream(buffer.array(), 0, buffer.limit());
-                ObjectInputStream ois = new ObjectInputStream(bais);
-                Request request = (Request) ois.readObject();
-
-                Response response = requestHandler.handleRequest(request);
-
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos);
-                oos.writeObject(response);
-                oos.flush();
-
-                buffer.clear();
-                buffer.put(baos.toByteArray());
-                buffer.flip();
-
-                while (buffer.hasRemaining()) {
-                    clientChannel.write(buffer);
-                }
-
-                clientChannel.close();
-            } catch (IOException | ClassNotFoundException e) {
-                System.err.println("Error handling client request: " + e.getMessage());
+        Executors.newSingleThreadExecutor().execute(() -> {
+            while (server.isOpen()) {
                 try {
-                    clientChannel.close();
-                } catch (IOException ex) {
-                    System.err.println("Error closing client channel: " + ex.getMessage());
+                    selector.select();
+                    for (var key : selector.selectedKeys()) {
+                        if (key.isAcceptable()) {
+                            accept(key);
+                        } else if (key.isReadable()) {
+                            read(key);
+                        }
+                    }
+                    selector.selectedKeys().clear();
+                } catch (IOException e) {
+                    System.err.println("Server error: " + e.getMessage());
                 }
             }
         });
     }
 
-    public void stop() {
-        isRunning = false;
-        executorService.shutdown();
+    private void accept(SelectionKey key) throws IOException {
+        SocketChannel client = ((ServerSocketChannel) key.channel()).accept();
+        client.configureBlocking(false);
+        client.register(selector, SelectionKey.OP_READ);
+    }
+
+    private void read(SelectionKey key) {
+        SocketChannel client = (SocketChannel) key.channel();
         try {
-            if (selector != null) {
-                selector.close();
+            // Чтение размера и данных
+            ByteBuffer sizeBuf = ByteBuffer.allocate(4);
+            if (client.read(sizeBuf) == -1) throw new IOException("Client disconnected");
+            sizeBuf.flip();
+            int size = sizeBuf.getInt();
+
+            ByteBuffer dataBuf = ByteBuffer.allocate(size);
+            if (client.read(dataBuf) == -1) throw new IOException("Client disconnected");
+            dataBuf.flip();
+
+            // Десериализация запроса
+            byte[] data = new byte[size];
+            dataBuf.get(data);
+            try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data))) {
+                Request request = (Request) ois.readObject();
+                Response response = handler.handleRequest(request);
+                sendResponse(client, response);
             }
-            if (serverSocketChannel != null) {
-                serverSocketChannel.close();
-            }
-        } catch (IOException e) {
-            System.err.println("Error stopping server: " + e.getMessage());
+        } catch (IOException | ClassNotFoundException e) {
+            closeClient(client);
         }
     }
-} 
+
+    private void sendResponse(SocketChannel client, Response response) throws IOException {
+        // Сериализация ответа
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            oos.writeObject(response);
+        }
+        byte[] data = baos.toByteArray();
+
+        // Отправка размера и данных
+        ByteBuffer buffer = ByteBuffer.allocate(4 + data.length);
+        buffer.putInt(data.length).put(data);
+        buffer.flip();
+        while (buffer.hasRemaining()) {
+            client.write(buffer);
+        }
+    }
+
+    private void closeClient(SocketChannel client) {
+        try {
+            client.close();
+        } catch (IOException ignored) {
+        }
+    }
+
+    public void stop() {
+        try {
+            if (server != null) server.close();
+        } catch (IOException ignored) {
+        }
+    }
+}
