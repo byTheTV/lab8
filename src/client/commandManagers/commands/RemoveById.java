@@ -3,7 +3,7 @@ package Client.commandManagers.commands;
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
 import Common.requests.RemoveByIdRequest;
-import Common.responses.Response;
+import Common.responses.RemoveByIdResponse;
 
 public class RemoveById extends NetworkCommand {
     public RemoveById(TCPClient tcpClient) {
@@ -23,26 +23,31 @@ public class RemoveById extends NetworkCommand {
     @Override
     public void execute() {
         try {
-            long id = Long.parseLong((String) argument);
-            Response response = sendAndReceive(new RemoveByIdRequest(id));
+            int id = Integer.parseInt((String) getArgument());
+            RemoveByIdRequest request = new RemoveByIdRequest(id);
+            RemoveByIdResponse response = (RemoveByIdResponse) sendAndReceive(request);
+
             if (response != null) {
-                if (response.getError() != null) {
-                    System.out.println("Ошибка: " + response.getError());
-                } else {
+                if (response.getError() == null) {
                     System.out.println("Элемент успешно удален");
+                } else {
+                    System.out.println("Ошибка: " + response.getError());
                 }
             }
         } catch (NumberFormatException e) {
-            System.out.println("Ошибка: id должен быть числом");
+            System.out.println("Ошибка: id должен быть целым числом");
         }
     }
 
     @Override
     public boolean checkArgument(Object argument) {
+        if (!(argument instanceof String)) {
+            return false;
+        }
         try {
-            Long.parseLong((String) argument);
+            Integer.parseInt((String) argument);
             return true;
-        } catch (NumberFormatException | ClassCastException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
     }

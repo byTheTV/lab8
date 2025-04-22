@@ -1,11 +1,15 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.*;
-import Client.network.TCPClient;
-import Common.models.*;
-import Common.requests.UpdateIdRequest;
-import Common.responses.Response;
 import java.util.Scanner;
+
+import Client.commandManagers.NetworkCommand;
+import Client.commandManagers.CommandManager;
+import Client.commandManagers.CommandMode;
+import Client.commandManagers.InputReader;
+import Common.models.StudyGroup;
+import Common.requests.UpdateIdRequest;
+import Common.responses.UpdateIdResponse;
+import Client.network.TCPClient;
 
 public class UpdateId extends NetworkCommand {
     private final CommandManager commandManager;
@@ -29,43 +33,30 @@ public class UpdateId extends NetworkCommand {
 
     @Override
     public void execute() {
-        if (argument == null) {
-            throw new IllegalArgumentException("Аргумент не может быть null");
-        }
-
-        long id = -1;
         try {
-            id = Long.parseLong((String) argument);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Аргумент должен быть числом", e);
-        }
+            int id = Integer.parseInt((String) getArgument());
+            StudyGroup studyGroup = new StudyGroup();
 
-        try {
-            StudyGroup newGroup = new StudyGroup();
-            newGroup.setId(id);
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
+            inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
 
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setName(inputReader.readName(null)), "название группы");
+            UpdateIdRequest request = new UpdateIdRequest(id, studyGroup);
+            UpdateIdResponse response = (UpdateIdResponse) sendAndReceive(request);
 
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setCoordinates(inputReader.readCoordinates(null)), "координаты");
-
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setStudentsCount(inputReader.readStudentsCount(null)), "количество студентов");
-
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setExpelledStudents(inputReader.readExpelledStudents(null)), "отчисленные студенты");
-
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setTransferredStudents(inputReader.readTransferredStudents(null)), "переведенные студенты");
-
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setFormOfEducation(inputReader.readFormOfEducation(null)), "форма обучения");
-
-            inputReader.SetFieldWithRetry(newGroup, () -> newGroup.setGroupAdmin(inputReader.readGroupAdmin(null)), "администратор группы");
-
-            Response response = sendAndReceive(new UpdateIdRequest(id, newGroup));
             if (response != null) {
-                if (response.getError() != null) {
-                    System.out.println("Ошибка: " + response.getError());
-                } else {
+                if (response.getError() == null) {
                     System.out.println("Элемент успешно обновлен");
+                } else {
+                    System.out.println("Ошибка: " + response.getError());
                 }
             }
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка: id должен быть целым числом");
         } catch (IllegalArgumentException e) {
             System.out.println("Ошибка: " + e.getMessage());
             if (commandManager.getCurrentMode() == CommandMode.CLI_UserMode) {
@@ -76,10 +67,13 @@ public class UpdateId extends NetworkCommand {
 
     @Override
     public boolean checkArgument(Object argument) {
+        if (!(argument instanceof String)) {
+            return false;
+        }
         try {
-            Long.parseLong((String) argument);
+            Integer.parseInt((String) argument);
             return true;
-        } catch (NumberFormatException | ClassCastException e) {
+        } catch (NumberFormatException e) {
             return false;
         }
     }

@@ -2,13 +2,12 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
-import Common.models.StudyGroup;
 import Common.requests.RemoveLowerRequest;
-import Common.responses.Response;
+import Common.responses.RemoveLowerResponse;
 
 /**
  * Команда remove_lower: удаляет из коллекции все элементы, меньшие, чем заданный.
- * Ожидается, что аргумент команды является объектом StudyGroup.
+ * Ожидается, что аргумент команды является объектом Integer.
  */
 public class RemoveLower extends NetworkCommand {
 
@@ -28,27 +27,21 @@ public class RemoveLower extends NetworkCommand {
     
     @Override
     public void execute() {
-        if (argument == null) {
-            throw new IllegalArgumentException("Argument cannot be null");
-        }
+        RemoveLowerRequest request = new RemoveLowerRequest((Integer) argument);
+        RemoveLowerResponse response = (RemoveLowerResponse) sendAndReceive(request);
 
-        try {
-            long id = Long.parseLong((String) argument);
-            Response response = sendAndReceive(new RemoveLowerRequest(id));
-            if (response != null) {
-                if (response.getError() != null) {
-                    System.out.println("Ошибка: " + response.getError());
-                } else {
-                    System.out.println(response.toString());
-                }
+        if (response != null) {
+            if (response.getError() == null) {
+                System.out.println("Удалено элементов: " + response.getRemovedCount());
+            } else {
+                System.out.println("Ошибка: " + response.getError());
             }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Argument is not a valid long value", e);
         }
     }
     
     @Override
     public boolean checkArgument(Object argument) {
-        return argument instanceof StudyGroup;
+        return argument instanceof Integer;
     }
+} 
 } 

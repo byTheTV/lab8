@@ -1,15 +1,17 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
-import Common.models.StudyGroup;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.AverageOfTransferredStudentsRequest;
+import Common.responses.AverageOfTransferredStudentsResponse;
 
 /**
  * Команда average_of_transferred_students: выводит среднее значение поля transferredStudents.
  */
-public class AverageOfTransferredStudents extends Command {
+public class AverageOfTransferredStudents extends NetworkCommand {
 
-    public AverageOfTransferredStudents() {
-        super(false);
+    public AverageOfTransferredStudents(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
     
     @Override
@@ -24,22 +26,16 @@ public class AverageOfTransferredStudents extends Command {
     
     @Override
     public void execute() {
-//        Collection<StudyGroup> collection = collectionManager.getCollection();
+        AverageOfTransferredStudentsRequest request = new AverageOfTransferredStudentsRequest();
+        AverageOfTransferredStudentsResponse response = (AverageOfTransferredStudentsResponse) sendAndReceive(request);
 
-        if (collection.isEmpty()) {
-            System.out.println("Коллекция пуста");
-            return;
+        if (response != null) {
+            if (response.getError() == null) {
+                System.out.println("Среднее значение transferredStudents: " + response.getAverage());
+            } else {
+                System.out.println("Ошибка: " + response.getError());
+            }
         }
-        
-        double sum = 0;
-        int count = 0;
-        for (StudyGroup sg : collection) {
-            sum += sg.getTransferredStudents();
-            count++;
-        }
-        
-        double average = sum / count;
-        System.out.println("Среднее значение transferredStudents: " + average);
     }
     
     @Override

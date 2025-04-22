@@ -3,7 +3,7 @@ package Client.commandManagers.commands;
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
 import Common.requests.ClearRequest;
-import Common.responses.Response;
+import Common.responses.ClearResponse;
 
 public class Clear extends NetworkCommand {
     public Clear(TCPClient tcpClient) {
@@ -22,12 +22,14 @@ public class Clear extends NetworkCommand {
 
     @Override
     public void execute() {
-        Response response = sendAndReceive(new ClearRequest());
+        ClearRequest request = new ClearRequest();
+        ClearResponse response = (ClearResponse) sendAndReceive(request);
+
         if (response != null) {
-            if (response.getError() != null) {
-                System.out.println("Ошибка: " + response.getError());
-            } else {
+            if (response.getError() == null) {
                 System.out.println("Коллекция успешно очищена");
+            } else {
+                System.out.println("Ошибка: " + response.getError());
             }
         }
     }

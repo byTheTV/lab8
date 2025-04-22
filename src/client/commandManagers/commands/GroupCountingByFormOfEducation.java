@@ -1,15 +1,18 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Common.requests.GroupCountingByFormOfEducationRequest;
+import Common.responses.GroupCountingByFormOfEducationResponse;
+import Client.network.TCPClient;
 
 /**
  * Команда group_counting_by_form_of_education: группирует элементы коллекции по значению поля formOfEducation
  * и выводит количество элементов в каждой группе.
  */
-public class GroupCountingByFormOfEducation extends Command {
+public class GroupCountingByFormOfEducation extends NetworkCommand {
 
-    public GroupCountingByFormOfEducation() {
-        super(false);
+    public GroupCountingByFormOfEducation(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
     
     @Override
@@ -24,25 +27,18 @@ public class GroupCountingByFormOfEducation extends Command {
     
     @Override
     public void execute() {
+        GroupCountingByFormOfEducationRequest request = new GroupCountingByFormOfEducationRequest();
+        GroupCountingByFormOfEducationResponse response = (GroupCountingByFormOfEducationResponse) sendAndReceive(request);
 
-        /*
-         Collection<StudyGroup> collection = collectionManager.getCollection();
-        if (collection.isEmpty()) {
-            System.out.println("Коллекция пуста");
-            return;
+        if (response != null) {
+            if (response.getError() == null) {
+                System.out.println("Количество групп по формам обучения:");
+                response.getCounts().forEach((form, count) -> 
+                    System.out.println(form + ": " + count));
+            } else {
+                System.out.println("Ошибка: " + response.getError());
+            }
         }
-        
-        Map<FormOfEducation, Integer> grouping = new HashMap<>();
-        for (StudyGroup sg : collection) {
-            FormOfEducation form = sg.getFormOfEducation();
-            grouping.put(form, grouping.getOrDefault(form, 0) + 1);
-        }
-        
-        for (Map.Entry<FormOfEducation, Integer> entry : grouping.entrySet()) {
-            System.out.println("Форма образования: " + entry.getKey() + " - " + entry.getValue() + " элементов");
-        }
-
-         */
     }
     
     @Override

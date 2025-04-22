@@ -4,7 +4,7 @@ public class AverageOfTransferredStudentsResponse extends Response {
     private final double average;
 
     public AverageOfTransferredStudentsResponse(double average, String error) {
-        super(error);
+        super("AverageOfTransferredStudents", error);
         this.average = average;
     }
 

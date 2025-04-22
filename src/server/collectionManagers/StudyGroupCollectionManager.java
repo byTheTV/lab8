@@ -115,6 +115,7 @@ public class StudyGroupCollectionManager {
         collection.clear();
     }
 
+
     /**
      * Returns the first element of the collection
      * @return the first StudyGroup or null if collection is empty

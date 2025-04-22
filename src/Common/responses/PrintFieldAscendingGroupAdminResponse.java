@@ -6,7 +6,7 @@ public class PrintFieldAscendingGroupAdminResponse extends Response {
     private final List<String> adminNames;
 
     public PrintFieldAscendingGroupAdminResponse(List<String> adminNames, String error) {
-        super(error);
+        super("PrintFieldAscendingGroupAdmin", error);
         this.adminNames = adminNames;
     }
 

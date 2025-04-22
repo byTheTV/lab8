@@ -6,7 +6,7 @@ public class ExecuteScriptResponse extends Response {
     private final List<String> executionResults;
 
     public ExecuteScriptResponse(List<String> executionResults, String error) {
-        super(error);
+        super("ExecuteScript", error);
         this.executionResults = executionResults;
     }
 

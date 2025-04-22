@@ -31,7 +31,7 @@ public class ExecuteScript extends Command {
     @Override
     public void execute() {
         String fileName = (String) this.argument;
-        
+
         if (!executedScripts.add(fileName)) {
             throw new RecursiveScriptException("Обнаружен рекурсивный вызов скрипта: " + fileName);
         }
@@ -40,7 +40,7 @@ public class ExecuteScript extends Command {
             /*
             CommandMode previousMode = commandManager.getCurrentMode();
             Scanner previousScanner = commandManager.getScanner();
-            
+
             commandManager.setCurrentMode(CommandMode.NonUserMode);
             commandManager.setScanner(fileScanner);
             */

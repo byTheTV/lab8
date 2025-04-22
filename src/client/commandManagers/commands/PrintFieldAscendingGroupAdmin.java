@@ -1,15 +1,19 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Common.requests.PrintFieldAscendingGroupAdminRequest;
+import Common.responses.PrintFieldAscendingGroupAdminResponse;
+import Client.network.TCPClient;
+
 
 /**
  * Команда print_field_ascending_group_admin: выводит значения поля groupAdmin всех элементов 
  * коллекции в порядке возрастания. Сортировка производится по имени администратора.
  */
-public class PrintFieldAscendingGroupAdmin extends Command {
+public class PrintFieldAscendingGroupAdmin extends NetworkCommand {
 
-    public PrintFieldAscendingGroupAdmin() {
-        super(false);
+    public PrintFieldAscendingGroupAdmin(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
     
     @Override
@@ -24,20 +28,17 @@ public class PrintFieldAscendingGroupAdmin extends Command {
     
     @Override
     public void execute() {
-        /*
-        List<Person> admins = new ArrayList<>();
-        for (StudyGroup sg : collectionManager.getCollection()) {
-            admins.add(sg.getGroupAdmin());
-        }
-        
-        // Сортировка по имени администратора
-        admins.sort(Comparator.comparing(Person::getName));
-        System.out.println("Список GroupAdmin в порядке возрастания:");
-        for (Person admin : admins) {
-            System.out.println(admin);
-        }
+        PrintFieldAscendingGroupAdminRequest request = new PrintFieldAscendingGroupAdminRequest();
+        PrintFieldAscendingGroupAdminResponse response = (PrintFieldAscendingGroupAdminResponse) sendAndReceive(request);
 
-         */
+        if (response != null) {
+            if (response.getError() == null) {
+                System.out.println("Имена администраторов групп в порядке возрастания:");
+                response.getAdminNames().forEach(System.out::println);
+            } else {
+                System.out.println("Ошибка: " + response.getError());
+            }
+        }
     }
     
     @Override

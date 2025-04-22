@@ -6,7 +6,7 @@ public class GroupCountingByFormOfEducationResponse extends Response {
     private final Map<String, Integer> counts;
 
     public GroupCountingByFormOfEducationResponse(Map<String, Integer> counts, String error) {
-        super(error);
+        super("GroupCountingByFormOfEducation", error);
         this.counts = counts;
     }
 

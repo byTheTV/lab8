@@ -6,7 +6,7 @@ public class HelpResponse extends Response {
     private final Map<String, String> commandDescriptions;
 
     public HelpResponse(Map<String, String> commandDescriptions, String error) {
-        super(error);
+        super("help", error);
         this.commandDescriptions = commandDescriptions;
     }
 

@@ -3,7 +3,8 @@ package Client.commandManagers.commands;
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
 import Common.requests.ShowRequest;
-import Common.responses.Response;
+import Common.responses.ShowResponse;
+import Common.models.Movie;
 
 public class Show extends NetworkCommand {
     public Show(TCPClient tcpClient) {
@@ -22,18 +23,22 @@ public class Show extends NetworkCommand {
 
     @Override
     public void execute() {
-        Response response = sendAndReceive(new ShowRequest());
+        ShowRequest request = new ShowRequest();
+        ShowResponse response = (ShowResponse) sendAndReceive(request);
+
         if (response != null) {
-            if (response.getError() != null) {
-                System.out.println("Ошибка: " + response.getError());
+            if (response.getError() == null) {
+                for (Movie movie : response.getMovies()) {
+                    System.out.println(movie);
+                }
             } else {
-                System.out.println(response.toString());
+                System.out.println("Ошибка: " + response.getError());
             }
         }
     }
 
     @Override
     public boolean checkArgument(Object argument) {
-        return true;
+        return argument == null;
     }
 } 

@@ -39,8 +39,8 @@ public class CommandManager {
         commandMap.put("help", new Help(tcpClient));
         commandMap.put("info", new Info(tcpClient));
         commandMap.put("show", new Show(tcpClient));
-        commandMap.put("add", new Add(scanner, this, tcpClient));
-        commandMap.put("update_id", new UpdateId(scanner, this, tcpClient));
+        commandMap.put("add", new Add( scanner, this, tcpClient));
+        commandMap.put("update_id", new UpdateId( scanner, this, tcpClient));
         commandMap.put("remove_by_id", new RemoveById(tcpClient));
         commandMap.put("clear", new Clear(tcpClient));
         commandMap.put("execute_script", new ExecuteScript(this));

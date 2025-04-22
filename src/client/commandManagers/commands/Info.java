@@ -3,7 +3,7 @@ package Client.commandManagers.commands;
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
 import Common.requests.InfoRequest;
-import Common.responses.Response;
+import Common.responses.InfoResponse;
 
 public class Info extends NetworkCommand {
     public Info(TCPClient tcpClient) {
@@ -22,18 +22,22 @@ public class Info extends NetworkCommand {
 
     @Override
     public void execute() {
-        Response response = sendAndReceive(new InfoRequest());
+        InfoRequest request = new InfoRequest();
+        InfoResponse response = (InfoResponse) sendAndReceive(request);
+
         if (response != null) {
-            if (response.getError() != null) {
-                System.out.println("Ошибка: " + response.getError());
+            if (response.getError() == null) {
+                System.out.println("Тип коллекции: " + response.getType());
+                System.out.println("Количество элементов: " + response.getSize());
+                System.out.println("Дата инициализации: " + response.getInitDate());
             } else {
-                System.out.println(response.toString());
+                System.out.println("Ошибка: " + response.getError());
             }
         }
     }
 
     @Override
     public boolean checkArgument(Object argument) {
-        return true;
+        return argument == null;
     }
 } 
