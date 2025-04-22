@@ -1,11 +1,14 @@
 package Common.responses;
 
+import java.time.LocalDateTime;
+
+
 public class InfoResponse extends Response {
     private final String collectionType;
-    private final String creationDate;
+    private final LocalDateTime creationDate;
     private final int size;
 
-    public InfoResponse(String collectionType, String creationDate, int size, String error) {
+    public InfoResponse(String collectionType, LocalDateTime creationDate, int size, String error) {
         super("info", error);
         this.collectionType = collectionType;
         this.creationDate = creationDate;
@@ -16,7 +19,7 @@ public class InfoResponse extends Response {
         return collectionType;
     }
 
-    public String getCreationDate() {
+    public LocalDateTime getCreationDate() {
         return creationDate;
     }
 

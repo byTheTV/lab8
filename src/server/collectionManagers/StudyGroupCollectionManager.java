@@ -2,6 +2,8 @@ package Server.collectionManagers;
 
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
+import java.util.List;
+import java.util.Map;
 
 import Common.models.StudyGroup;
 
@@ -36,11 +38,6 @@ public class StudyGroupCollectionManager {
         return true;
     }
 
-    /**
-     * Загружает коллекцию из XML-файла, заданного в dataFile.
-     *
-     * @return true, если загрузка прошла успешно, иначе false
-     */
     /*
     public boolean load() {
         try {
@@ -54,14 +51,9 @@ public class StudyGroupCollectionManager {
             return false;
         }
     }
-    */
-    /**
-     * Сохраняет коллекцию в XML-файл.
-     *
-     * @return true, если сохранение прошло успешно, иначе false
-     */
+    
 
-    /*
+    
     public boolean saveCollection() {
         try {
             XMLWriter.writeStudyGroupCollection(collection, dataFile);
@@ -136,10 +128,11 @@ public class StudyGroupCollectionManager {
      * Removes all elements lower than the given study group
      * @param studyGroup the study group to compare with
      */
-    public void removeLower(StudyGroup studyGroup) {
+    public int removeLower(StudyGroup studyGroup) {
+        int initialSize = collection.size();
         collection.removeIf(group -> group.compareTo(studyGroup) < 0);
+        return initialSize - collection.size();
     }
-
     /**
      * Calculates average of transferred students across all groups
      * @return average number of transferred students
@@ -184,6 +177,7 @@ public class StudyGroupCollectionManager {
         return collection.size();
     }
 
+
     /**
      * Возвращает строковое представление состояния коллекции.
      *
@@ -206,5 +200,25 @@ public class StudyGroupCollectionManager {
                 .filter(group -> group.getId().equals(id.intValue()))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public Map<String, Integer> groupCountingByFormOfEducation() {
+        return StudyGroupCollectionUtils.groupCountingByFormOfEducation(collection);
+    }
+
+    public Map<String, String> getCommandDescriptions() {
+        return StudyGroupCollectionUtils.getCommandDescriptions();
+    }
+
+    public List<String> printFieldAscendingGroupAdmin() {
+        return StudyGroupCollectionUtils.printFieldAscendingGroupAdmin(collection);
+    }
+
+    public List<StudyGroup> show() {
+        return StudyGroupCollectionUtils.show(collection);
+    }
+
+    public double averageOfTransferredStudents() {
+        return StudyGroupCollectionUtils.averageOfTransferredStudents(collection);
     }
 } 

@@ -34,7 +34,7 @@ public class UpdateId extends NetworkCommand {
     @Override
     public void execute() {
         try {
-            int id = Integer.parseInt((String) getArgument());
+            Long id = Long.parseLong((String) getArgument());
             StudyGroup studyGroup = new StudyGroup();
 
             inputReader.SetFieldWithRetry(studyGroup, () -> studyGroup.setName(inputReader.readName(null)), "название группы");

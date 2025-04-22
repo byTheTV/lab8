@@ -2,9 +2,9 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.StudyGroup;
 import Common.requests.ShowRequest;
 import Common.responses.ShowResponse;
-import Common.models.Movie;
 
 public class Show extends NetworkCommand {
     public Show(TCPClient tcpClient) {
@@ -28,8 +28,8 @@ public class Show extends NetworkCommand {
 
         if (response != null) {
             if (response.getError() == null) {
-                for (Movie movie : response.getMovies()) {
-                    System.out.println(movie);
+                for (StudyGroup studyGroup : response.getCollection()) {
+                    System.out.println(studyGroup);
                 }
             } else {
                 System.out.println("Ошибка: " + response.getError());

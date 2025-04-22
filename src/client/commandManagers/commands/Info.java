@@ -27,9 +27,9 @@ public class Info extends NetworkCommand {
 
         if (response != null) {
             if (response.getError() == null) {
-                System.out.println("Тип коллекции: " + response.getType());
+                System.out.println("Тип коллекции: " + response.getCollectionType());
                 System.out.println("Количество элементов: " + response.getSize());
-                System.out.println("Дата инициализации: " + response.getInitDate());
+                System.out.println("Дата инициализации: " + response.getCreationDate());
             } else {
                 System.out.println("Ошибка: " + response.getError());
             }

@@ -23,7 +23,7 @@ public class RemoveById extends NetworkCommand {
     @Override
     public void execute() {
         try {
-            int id = Integer.parseInt((String) getArgument());
+            Long id = Long.parseLong((String) getArgument());
             RemoveByIdRequest request = new RemoveByIdRequest(id);
             RemoveByIdResponse response = (RemoveByIdResponse) sendAndReceive(request);
 
@@ -45,7 +45,7 @@ public class RemoveById extends NetworkCommand {
             return false;
         }
         try {
-            Integer.parseInt((String) argument);
+            Long.parseLong((String) argument);
             return true;
         } catch (NumberFormatException e) {
             return false;

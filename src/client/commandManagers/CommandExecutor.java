@@ -1,8 +1,11 @@
 package Client.commandManagers;
 
-import exceptions.BuildObjectException;
 import java.io.InputStream;
 import java.util.Scanner;
+
+import Client.network.TCPClient;
+import exceptions.BuildObjectException;
+
 
 /**
  * Класс {@code CommandExecutor} обрабатывает ввод и выполнение команд,
@@ -25,9 +28,9 @@ public class CommandExecutor {
      * @param in поток ввода для считывания команд.
      */
 
-    public void startExecuting(InputStream in) {
+    public void startExecuting(InputStream in, TCPClient client) {
         try (Scanner scanner = new Scanner(in)) {
-            CommandManager commandManager = new CommandManager(scanner);
+            CommandManager commandManager = new CommandManager(scanner, client);
             
             if (commandManager.getCommandMap().containsKey("help")) {
                 try {

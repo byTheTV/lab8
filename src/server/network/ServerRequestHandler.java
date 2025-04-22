@@ -1,12 +1,31 @@
 package Server.network;
 
-import Common.requests.*;
-import Common.responses.*;
-import Server.collectionManagers.StudyGroupCollectionManager;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 import java.util.function.Function;
+
+import Common.models.StudyGroup;
+import Common.requests.AddRequest;
+import Common.requests.RemoveByIdRequest;
+import Common.requests.RemoveLowerRequest;
+import Common.requests.Request;
+import Common.requests.UpdateIdRequest;
+import Common.responses.AddResponse;
+import Common.responses.AverageOfTransferredStudentsResponse;
+import Common.responses.ClearResponse;
+import Common.responses.GroupCountingByFormOfEducationResponse;
+import Common.responses.HeadResponse;
+import Common.responses.HelpResponse;
+import Common.responses.InfoResponse;
+import Common.responses.PrintFieldAscendingGroupAdminResponse;
+import Common.responses.RemoveByIdResponse;
+import Common.responses.RemoveHeadResponse;
+import Common.responses.RemoveLowerResponse;
+import Common.responses.Response;
+import Common.responses.ShowResponse;
+import Common.responses.UpdateIdResponse;
+import Server.collectionManagers.StudyGroupCollectionManager;
 
 public class ServerRequestHandler implements RequestHandler {
     private final StudyGroupCollectionManager collectionManager;
@@ -80,7 +99,7 @@ public class ServerRequestHandler implements RequestHandler {
                 return new InfoResponse(
                     collectionManager.getCollectionType(),
                     collectionManager.getCreationDate(),
-                    collectionManager.getCollectionSize(),
+                    collectionManager.getSize(),
                     null
                 );
             } catch (Exception e) {
@@ -118,7 +137,15 @@ public class ServerRequestHandler implements RequestHandler {
         requestHandlers.put("remove_lower", request -> {
             RemoveLowerRequest removeRequest = (RemoveLowerRequest) request;
             try {
-                int count = collectionManager.removeLower(removeRequest.getStudyGroup());
+                // Находим объект по ID из коллекции
+                StudyGroup targetGroup = collectionManager.getById(removeRequest.getId());
+                
+                if (targetGroup == null) {
+                    throw new IllegalArgumentException("Элемент с ID " + removeRequest.getId() + " не найден");
+                }
+
+                // Удаляем элементы, меньшие чем targetGroup
+                int count = collectionManager.removeLower(targetGroup);
                 return new RemoveLowerResponse(count, null);
             } catch (Exception e) {
                 return new RemoveLowerResponse(0, e.getMessage());
@@ -136,7 +163,7 @@ public class ServerRequestHandler implements RequestHandler {
         requestHandlers.put("update_id", request -> {
             UpdateIdRequest updateRequest = (UpdateIdRequest) request;
             try {
-                collectionManager.updateId(updateRequest.getId(), updateRequest.getStudyGroup());
+                collectionManager.updateById(updateRequest.getId(), updateRequest.getUpdatedGroup());
                 return new UpdateIdResponse(null);
             } catch (Exception e) {
                 return new UpdateIdResponse(e.getMessage());
@@ -155,14 +182,11 @@ public class ServerRequestHandler implements RequestHandler {
 
     @Override
     public Response handleRequest(Request request) {
-        try {
-            Function<Request, Response> handler = requestHandlers.get(request.getName());
-            if (handler != null) {
-                return handler.apply(request);
-            }
-            return new ErrorResponse("Unknown request type", "Unknown request type");
-        } catch (Exception e) {
-            return new ErrorResponse("Error processing request", e.getMessage());
+        Function<Request, Response> handler = requestHandlers.get(request.getName());
+        if (handler != null) {
+            return handler.apply(request);
         }
+        // Возвращаем базовый Response с ошибкой
+        return new Response("error", "Unknown request type: " + request.getName()) {};
     }
 } 

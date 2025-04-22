@@ -31,7 +31,7 @@ public class Help extends NetworkCommand {
         if (response != null) {
             if (response.getError() == null) {
                 System.out.println("Доступные команды:");
-                response.getCommands().forEach((name, descr) -> 
+                response.getCommandDescriptions().forEach((name, descr) -> 
                     System.out.println(name + " - " + descr));
             } else {
                 System.out.println("Ошибка: " + response.getError());

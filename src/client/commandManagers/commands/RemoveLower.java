@@ -27,7 +27,7 @@ public class RemoveLower extends NetworkCommand {
     
     @Override
     public void execute() {
-        RemoveLowerRequest request = new RemoveLowerRequest((Integer) argument);
+        RemoveLowerRequest request = new RemoveLowerRequest(Long.parseLong(argument));
         RemoveLowerResponse response = (RemoveLowerResponse) sendAndReceive(request);
 
         if (response != null) {
@@ -44,4 +44,4 @@ public class RemoveLower extends NetworkCommand {
         return argument instanceof Integer;
     }
 } 
-} 
+ 
