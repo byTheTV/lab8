@@ -79,8 +79,13 @@ public class ServerRequestHandler implements RequestHandler {
 
         requestHandlers.put("head", request -> {
             try {
-                return new HeadResponse(collectionManager.getHead(), null);
+                System.out.println("Обработка запроса head...");
+                StudyGroup headGroup = collectionManager.getHead();
+                System.out.println("Получен первый элемент коллекции: " + (headGroup != null ? headGroup.toString() : "null"));
+                return new HeadResponse(headGroup, null);
             } catch (Exception e) {
+                System.err.println("Ошибка при обработке запроса head: " + e.getMessage());
+                e.printStackTrace();
                 return new HeadResponse(null, e.getMessage());
             }
         });

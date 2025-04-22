@@ -1,5 +1,6 @@
 package Common.models;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 //import java.util.HashSet;
 //import java.util.Set;
@@ -7,7 +8,8 @@ import java.time.LocalDate;
 /**
  * Класс {@code Person} представляет администратора группы с информацией о личности.
  */
-public class Person implements Comparable<Person> {
+public class Person implements Comparable<Person>, Serializable {
+    private static final long serialVersionUID = 1L;
    
     private String name; // Поле не может быть null, Строка не может быть пустой
     private LocalDate birthday; // Поле может быть null

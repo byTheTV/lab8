@@ -1,5 +1,6 @@
 package Common.models;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 
@@ -7,7 +8,8 @@ import java.util.Objects;
  * Класс StudyGroup представляет учебную группу с набором характеристик, включая объект-администратора.
  * Поле id генерируется автоматически, его значение > 0 и уникально.
  */
-public class StudyGroup implements Comparable<StudyGroup> {
+public class StudyGroup implements Comparable<StudyGroup>, Serializable {
+    private static final long serialVersionUID = 1L;
     private static int idCounter = 1; // Счётчик для автоматической генерации уникального id
 
     private Integer id; // Поле не может быть null, значение > 0, уникальное, генерируется автоматически

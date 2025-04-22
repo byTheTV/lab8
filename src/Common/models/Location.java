@@ -1,6 +1,9 @@
 package Common.models;
 
-public class Location {
+import java.io.Serializable;
+
+public class Location implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Float x; // Поле не может быть null
     private Float y; // Поле не может быть null
     private Float z; // Поле не может быть null

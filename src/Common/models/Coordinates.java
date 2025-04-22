@@ -1,6 +1,9 @@
 package Common.models;
 
-public class Coordinates {
+import java.io.Serializable;
+
+public class Coordinates implements Serializable {
+    private static final long serialVersionUID = 1L;
     private Long x; // Максимальное значение поля: 648, Поле не может быть null
     private Long y; // Поле не может быть null
 
