@@ -1,4 +1,4 @@
-package server.models;
+package Common.models;
 
 public class Location {
     private Float x; // Поле не может быть null

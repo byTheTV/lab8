@@ -1,6 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
+import Client.commandManagers.Command;
 
 /**
  * Команда exit: завершает работу программы без сохранения в файл.

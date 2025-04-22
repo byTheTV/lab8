@@ -1,4 +1,4 @@
-package client.commandManagers;
+package Client.commandManagers;
 
 import exceptions.BuildObjectException;
 import java.io.InputStream;
@@ -9,7 +9,6 @@ import java.util.Scanner;
  * направленных на управление коллекцией {@code StudyGroup}.
  */
 public class CommandExecutor {
-
 
     /**
      * Конструктор для создания исполнитель команд.

@@ -1,10 +1,9 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.*;
+import Client.commandManagers.*;
 import collectionManagers.StudyGroupCollectionManager;
-import client.models.*;
+
 import java.util.Scanner;
-import java.time.LocalDate;
 
 public class UpdateId extends Command {
     private final CommandManager commandManager;

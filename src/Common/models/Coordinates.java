@@ -1,4 +1,4 @@
-package client.models;
+package Common.models;
 
 public class Coordinates {
     private Long x; // Максимальное значение поля: 648, Поле не может быть null

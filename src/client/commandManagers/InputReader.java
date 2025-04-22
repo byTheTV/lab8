@@ -1,6 +1,6 @@
-package client.commandManagers;
+package Client.commandManagers;
 
-import client.models.*;
+import Common.models.*;
 import java.time.LocalDate;
 import java.util.Scanner;
 

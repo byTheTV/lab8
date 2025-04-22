@@ -1,6 +1,4 @@
-package client.network.requests;
-
-import client.network.Request;
+package Common.requests;
 
 public class HeadRequest extends Request {
     public HeadRequest() {

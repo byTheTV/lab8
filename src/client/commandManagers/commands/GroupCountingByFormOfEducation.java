@@ -1,11 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
-import client.models.StudyGroup;
-import client.models.FormOfEducation;
-import java.util.Collection;
-import java.util.Map;
-import java.util.HashMap;
+import Client.commandManagers.Command;
 
 /**
  * Команда group_counting_by_form_of_education: группирует элементы коллекции по значению поля formOfEducation

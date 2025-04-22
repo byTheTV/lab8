@@ -1,4 +1,4 @@
-package server.models;
+package Common.models;
 
 public enum FormOfEducation {
     DISTANCE_EDUCATION,

@@ -1,4 +1,4 @@
-package client.commandManagers;
+package Client.commandManagers;
 
 /**
  * Перечисление {@code CommandMode} задаёт режимы работы командного исполнителя.

@@ -1,8 +1,8 @@
-package client.network.requests;
+package Common.requests;
 
 import java.util.Objects;
-import client.network.Request;
-import client.models.StudyGroup;
+
+import Common.models.StudyGroup;
 
 
 public class UpdateIdRequest extends Request {

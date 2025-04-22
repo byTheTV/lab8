@@ -1,4 +1,4 @@
-package client.models;
+package Common.models;
 
 public enum Color {
     GREEN,

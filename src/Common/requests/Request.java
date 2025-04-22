@@ -1,9 +1,7 @@
-package client.network;
+package Common.requests;
 
 import java.io.Serializable;
 import java.util.Objects;
-import client.models.*;
-
 
 
 public abstract class Request implements Serializable {

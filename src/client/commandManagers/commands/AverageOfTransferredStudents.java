@@ -1,8 +1,7 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
-import client.models.StudyGroup;
-import java.util.Collection;
+import Client.commandManagers.Command;
+import Common.models.StudyGroup;
 
 /**
  * Команда average_of_transferred_students: выводит среднее значение поля transferredStudents.

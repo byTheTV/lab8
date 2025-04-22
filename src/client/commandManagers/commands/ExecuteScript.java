@@ -1,6 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.*;
+import Client.commandManagers.*;
 import exceptions.RecursiveScriptException;
 
 import java.io.File;

@@ -1,4 +1,4 @@
-package client.models;
+package Common.models;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;

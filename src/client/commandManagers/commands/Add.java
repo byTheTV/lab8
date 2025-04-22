@@ -1,9 +1,8 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.*;
-import client.models.*;
+import Client.commandManagers.*;
+import Common.models.*;
 import java.util.Scanner;
-import java.time.LocalDate;
 
 public class Add extends Command {
     private final CommandManager commandManager;

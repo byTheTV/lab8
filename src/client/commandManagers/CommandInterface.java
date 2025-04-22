@@ -1,4 +1,4 @@
-package client.commandManagers;
+package Client.commandManagers;
 
 import exceptions.BuildObjectException;
 

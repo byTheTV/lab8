@@ -1,4 +1,4 @@
-package server.models;
+package Common.models;
 
 import java.time.LocalDate;
 //import java.util.HashSet;
@@ -29,8 +29,8 @@ public class Person implements Comparable<Person> {
      * @param birthday дата рождения администратора.
      * @param passportID идентификатор паспорта.
      */
-    public Person(String name, LocalDate birthday, String passportID,
-                  Color eyeColor, Location location) {
+    public Person(String name, LocalDate birthday, String passportID, 
+                 Color eyeColor, Location location) {
         setName(name);
         this.birthday = birthday;
         setPassportID(passportID);

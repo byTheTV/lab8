@@ -1,12 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
-import client.models.StudyGroup;
-import client.models.Person;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
+import Client.commandManagers.Command;
 
 /**
  * Команда print_field_ascending_group_admin: выводит значения поля groupAdmin всех элементов 

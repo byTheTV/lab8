@@ -1,11 +1,9 @@
-package server.collectionManagers;
+package Server.collectionManagers;
 
-import fileLogic.XMLReader;
-import fileLogic.XMLWriter;
 import java.time.LocalDateTime;
 import java.util.ArrayDeque;
-import java.util.Collection;
-import server.models.StudyGroup;
+
+import Common.models.StudyGroup;
 
 /**
  * Class that manages the collection of StudyGroup objects.

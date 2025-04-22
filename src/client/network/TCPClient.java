@@ -1,8 +1,12 @@
-package client.network;
+package Client.network;
 
+import Common.requests.Request;
+
+import Common.responses.Response;
 import java.net.*;
 import java.io.*;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
@@ -50,7 +54,37 @@ public class TCPClient {
         }
     }
 
-    public void close() throws IOException {
-        //socket.close();
+
+    public void sendRequest(Request request) throws IOException {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ObjectOutputStream oos = new ObjectOutputStream(baos);
+        oos.writeObject(request);
+        oos.flush();
+        buffer.put(baos.toByteArray());
+        buffer.flip();
+        while (buffer.hasRemaining()) {
+            socketChannel.write(buffer);
+        }
+    }
+
+    public Response receiveResponse() throws IOException, ClassNotFoundException {
+        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        socketChannel.read(buffer);
+        buffer.flip();
+        ByteArrayInputStream bais = new ByteArrayInputStream(buffer.array(), 0, buffer.limit());
+        ObjectInputStream ois = new ObjectInputStream(bais);
+        return (Response) ois.readObject();
+    }
+
+
+    public void close() {
+        try {
+            if (socketChannel != null && socketChannel.isOpen()) {
+                socketChannel.close();
+            }
+        } catch (IOException e) {
+            System.err.println("Error closing channel: " + e.getMessage());
+        }
     }
 }

@@ -1,7 +1,6 @@
-package client.network.requests;
+package Common.requests;
 
 import java.util.Objects;
-import client.network.Request;
 
 public class RemoveByIdRequest extends Request {
     private final Long id;

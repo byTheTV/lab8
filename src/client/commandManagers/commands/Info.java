@@ -1,6 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
+import Client.commandManagers.Command;
 
 public class Info extends Command {
     public Info() {

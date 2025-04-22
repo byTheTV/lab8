@@ -1,15 +1,14 @@
-package client.network.requests;
+package Common.requests;
 
-import client.network.Request;
-import client.models.StudyGroup;
+import Common.models.StudyGroup;
 import java.util.Objects;
 
 
-public class AddRequest extends Request {
+public class RemoveLowerRequest extends Request {
     private final StudyGroup studyGroup;
 
-    public AddRequest(StudyGroup studyGroup) {
-        super("add");
+    public RemoveLowerRequest(StudyGroup studyGroup) {
+        super("remove_lower");
         this.studyGroup = studyGroup;
     }
 
@@ -20,9 +19,9 @@ public class AddRequest extends Request {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AddRequest)) return false;
+        if (!(o instanceof RemoveLowerRequest)) return false;
         if (!super.equals(o)) return false;
-        AddRequest that = (AddRequest) o;
+        RemoveLowerRequest that = (RemoveLowerRequest) o;
         return Objects.equals(studyGroup, that.studyGroup);
     }
 

@@ -1,6 +1,6 @@
-package client.commandManagers;
+package Client.commandManagers;
 
-import client.commandManagers.commands.*;
+import Client.commandManagers.commands.*;
 import exceptions.BuildObjectException;
 import exceptions.CommandInterruptedException;
 import exceptions.UnknownCommandException;
@@ -101,6 +101,7 @@ public class CommandManager {
             }
 
             command.execute();
+
         } catch (IllegalArgumentException | NullPointerException | NoSuchElementException e) {
             System.err.println("Выполнение команды пропущено из-за неправильных предоставленных аргументов! (" + e.getMessage() + ")");
             if (currentMode == CommandMode.CLI_UserMode) {

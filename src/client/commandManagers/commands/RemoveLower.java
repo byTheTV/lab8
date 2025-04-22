@@ -1,8 +1,7 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
-import client.models.StudyGroup;
-import java.util.Iterator;
+import Client.commandManagers.Command;
+import Common.models.StudyGroup;
 
 /**
  * Команда remove_lower: удаляет из коллекции все элементы, меньшие, чем заданный.

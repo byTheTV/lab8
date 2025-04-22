@@ -1,10 +1,6 @@
-package client.commandManagers;
+package Client.commandManagers;
 
 import exceptions.BuildObjectException;
-import client.models.*;
-
-import java.time.LocalDate;
-import java.util.Scanner;
 
 /**
  Abstract class representing a command that can be executed in the program.

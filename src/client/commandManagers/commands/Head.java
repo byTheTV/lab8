@@ -1,8 +1,6 @@
-package client.commandManagers.commands;
+package Client.commandManagers.commands;
 
-import client.commandManagers.Command;
-import client.models.StudyGroup;
-import java.util.Iterator;
+import Client.commandManagers.Command;
 
 /**
  * Команда head: выводит первый элемент коллекции.
