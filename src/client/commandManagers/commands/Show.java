@@ -1,10 +1,13 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.ShowRequest;
+import Common.responses.Response;
 
-public class Show extends Command {
-    public Show() {
-        super(false);
+public class Show extends NetworkCommand {
+    public Show(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
 
     @Override
@@ -19,14 +22,14 @@ public class Show extends Command {
 
     @Override
     public void execute() {
-        /*
-        if (collectionManager.getCollection().isEmpty()) {
-            System.out.println("Коллекция пуста");
-            return;
+        Response response = sendAndReceive(new ShowRequest());
+        if (response != null) {
+            if (response.getError() != null) {
+                System.out.println("Ошибка: " + response.getError());
+            } else {
+                System.out.println(response.toString());
+            }
         }
-        collectionManager.getCollection().forEach(System.out::println);
-
-         */
     }
 
     @Override

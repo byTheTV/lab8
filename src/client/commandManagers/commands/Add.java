@@ -1,8 +1,12 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.*;
-import Common.models.*;
 import java.util.Scanner;
+
+import Client.commandManagers.Command;
+import Client.commandManagers.CommandManager;
+import Client.commandManagers.CommandMode;
+import Client.commandManagers.InputReader;
+import Common.models.StudyGroup;
 
 public class Add extends Command {
     private final CommandManager commandManager;

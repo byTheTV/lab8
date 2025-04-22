@@ -1,10 +1,13 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.InfoRequest;
+import Common.responses.Response;
 
-public class Info extends Command {
-    public Info() {
-        super(false);
+public class Info extends NetworkCommand {
+    public Info(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
 
     @Override
@@ -19,12 +22,14 @@ public class Info extends Command {
 
     @Override
     public void execute() {
-        /*
-        System.out.println("Тип коллекции: " + collectionManager.getCollectionType());
-        System.out.println("Дата инициализации: " + collectionManager.getCreationDate());
-        System.out.println("Количество элементов: " + collectionManager.getSize());
-
-         */
+        Response response = sendAndReceive(new InfoRequest());
+        if (response != null) {
+            if (response.getError() != null) {
+                System.out.println("Ошибка: " + response.getError());
+            } else {
+                System.out.println(response.toString());
+            }
+        }
     }
 
     @Override

@@ -1,14 +1,17 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.RemoveHeadRequest;
+import Common.responses.Response;
 
 /**
  * Команда remove_head: выводит первый элемент коллекции и удаляет его.
  */
-public class RemoveHead extends Command {
+public class RemoveHead extends NetworkCommand {
 
-    public RemoveHead() {
-        super(false);
+    public RemoveHead(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
     
     @Override
@@ -23,21 +26,14 @@ public class RemoveHead extends Command {
     
     @Override
     public void execute() {
-        /*
-        if (collectionManager.getCollection().isEmpty()) {
-            System.out.println("Коллекция пуста");
-            return;
+        Response response = sendAndReceive(new RemoveHeadRequest());
+        if (response != null) {
+            if (response.getError() != null) {
+                System.out.println("Ошибка: " + response.getError());
+            } else {
+                System.out.println(response.toString());
+            }
         }
-        
-        Iterator<StudyGroup> iterator = collectionManager.getCollection().iterator();
-        if (iterator.hasNext()) {
-            StudyGroup first = iterator.next();
-            System.out.println(first);
-            iterator.remove();
-            System.out.println("Элемент удалён.");
-        }
-
-         */
     }
     
     @Override

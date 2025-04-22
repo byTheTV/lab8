@@ -1,10 +1,13 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.ClearRequest;
+import Common.responses.Response;
 
-public class Clear extends Command {
-    public Clear() {
-        super(false);
+public class Clear extends NetworkCommand {
+    public Clear(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
 
     @Override
@@ -19,10 +22,14 @@ public class Clear extends Command {
 
     @Override
     public void execute() {
-        //
-        // Fix here
-        // collectionManager.clear();
-        System.out.println("Коллекция очищена");
+        Response response = sendAndReceive(new ClearRequest());
+        if (response != null) {
+            if (response.getError() != null) {
+                System.out.println("Ошибка: " + response.getError());
+            } else {
+                System.out.println("Коллекция успешно очищена");
+            }
+        }
     }
 
     @Override

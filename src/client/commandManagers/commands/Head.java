@@ -1,14 +1,17 @@
 package Client.commandManagers.commands;
 
-import Client.commandManagers.Command;
+import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.requests.HeadRequest;
+import Common.responses.Response;
 
 /**
  * Команда head: выводит первый элемент коллекции.
  */
-public class Head extends Command {
+public class Head extends NetworkCommand {
 
-    public Head() {
-        super(false);
+    public Head(TCPClient tcpClient) {
+        super(false, tcpClient);
     }
     
     @Override
@@ -23,18 +26,14 @@ public class Head extends Command {
     
     @Override
     public void execute() {
-       /*
-        if (collectionManager.getCollection().isEmpty()) {
-            System.out.println("Коллекция пуста");
-            return;
+        Response response = sendAndReceive(new HeadRequest());
+        if (response != null) {
+            if (response.getError() != null) {
+                System.out.println("Ошибка: " + response.getError());
+            } else {
+                System.out.println(response.toString());
+            }
         }
-        Iterator<StudyGroup> iterator = collectionManager.getCollection().iterator();
-        if (iterator.hasNext()) {
-            StudyGroup first = iterator.next();
-            System.out.println(first);
-        }
-
-        */
     }
     
     @Override
