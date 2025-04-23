@@ -2,6 +2,7 @@
 
 ./gradlew runClient
 ./gradlew runServer
+./gradlew runClient -Phost="localhost" -Pport="55555"
 
  */
 

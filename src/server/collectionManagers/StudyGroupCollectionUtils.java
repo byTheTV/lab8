@@ -39,6 +39,7 @@ public class StudyGroupCollectionUtils {
         descriptions.put("add", "Add new element");
         descriptions.put("update_id", "Update element by ID");
         descriptions.put("remove_by_id", "Remove element by ID");
+        descriptions.put("execute_script", "Complete script from file");
         descriptions.put("clear", "Clear collection");
         descriptions.put("head", "Show first element");
         descriptions.put("remove_head", "Remove and return first element");

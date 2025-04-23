@@ -14,7 +14,6 @@ import Common.requests.UpdateIdRequest;
 import Common.responses.AddResponse;
 import Common.responses.AverageOfTransferredStudentsResponse;
 import Common.responses.ClearResponse;
-import Common.responses.ExecuteScriptResponse;
 import Common.responses.GroupCountingByFormOfEducationResponse;
 import Common.responses.HeadResponse;
 import Common.responses.HelpResponse;
