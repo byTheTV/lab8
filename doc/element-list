@@ -1,5 +1,12 @@
-collectionManagers
-commandManagers
-commandManagers.commands
-fileLogic
-models
+Client
+Client.commandManagers
+Client.commandManagers.commands
+Client.exceptions
+Client.fileLogic
+Client.network
+Common.models
+Common.requests
+Common.responses
+Server
+Server.collectionManagers
+Server.network

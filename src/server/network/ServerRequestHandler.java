@@ -7,7 +7,6 @@ import java.util.function.Function;
 
 import Common.models.StudyGroup;
 import Common.requests.AddRequest;
-import Common.requests.ExecuteScriptRequest;
 import Common.requests.RemoveByIdRequest;
 import Common.requests.RemoveLowerRequest;
 import Common.requests.Request;
@@ -59,15 +58,6 @@ public class ServerRequestHandler implements RequestHandler {
             }
         });
 
-        requestHandlers.put("execute_script", request -> {
-            ExecuteScriptRequest scriptRequest = (ExecuteScriptRequest) request;
-            try {
-                String result = collectionManager.executeCommand(scriptRequest.getCommand(), scriptRequest.getArgument());
-                return new ExecuteScriptResponse(List.of(result), null);
-            } catch (Exception e) {
-                return new ExecuteScriptResponse(null, e.getMessage());
-            }
-        });
 
         requestHandlers.put("group_counting_by_form_of_education", request -> {
             try {
