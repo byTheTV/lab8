@@ -1,0 +1,16 @@
+show
+update_id 1
+NewGroupName
+200
+300
+150
+75
+50
+2
+NewAdminName
+1999-12-31
+CD654321
+3
+45.6
+67.8
+89.0

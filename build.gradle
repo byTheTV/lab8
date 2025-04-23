@@ -1,3 +1,10 @@
+/*
+
+./gradlew runClient
+./gradlew runServer
+
+ */
+
 plugins {
     id 'java'
     id 'application'
@@ -15,8 +22,9 @@ dependencies {
     // implementation 'some-library:1.0'
 }
 
+// Конфигурация для клиента
 application {
-    mainClass = 'Client.Client'  // Главный класс для запуска
+    mainClass = 'Client.Client'  // Главный класс для запуска клиента
 }
 
 sourceSets {
@@ -24,9 +32,71 @@ sourceSets {
         java {
             srcDirs = ['src']  // Указываем, где исходный код
         }
+        resources {
+            srcDirs = ['resourses']  // Указываем, где ресурсы
+        }
     }
 }
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'  // Устанавливаем кодировку
+    options.compilerArgs += ['-Xlint:unchecked', '-Xlint:deprecation']
+}
+
+// Настройка для запуска клиента с аргументами командной строки
+task runClient(type: JavaExec) {
+    group = "application"
+    description = "Запуск клиентского приложения"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'Client.Client'
+    standardInput = System.in
+    if (project.hasProperty('host')) {
+        args = [project.property('host')]
+    }
+    if (project.hasProperty('port')) {
+        args += [project.property('port')]
+    }
+}
+
+// Настройка для запуска сервера
+task runServer(type: JavaExec) {
+    group = "application"
+    description = "Запуск серверного приложения"
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = 'Server.Server'
+}
+
+// Настройка для создания JAR клиента
+task clientJar(type: Jar) {
+    group = "build"
+    description = "Создание JAR файла для клиента"
+    archiveClassifier = 'client'
+    manifest {
+        attributes 'Main-Class': 'Client.Client'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+// Настройка для создания JAR сервера
+task serverJar(type: Jar) {
+    group = "build"
+    description = "Создание JAR файла для сервера"
+    archiveClassifier = 'server'
+    manifest {
+        attributes 'Main-Class': 'Server.Server'
+    }
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
+
+// Создание обоих JAR файлов
+task buildAllJars {
+    group = "build"
+    description = "Создание JAR файлов для клиента и сервера"
+    dependsOn clientJar, serverJar
 }
