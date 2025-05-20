@@ -28,7 +28,7 @@ public class ServerRequestHandler implements RequestHandler {
 
         requestHandlers.put("auth", request -> {
             AuthRequest authRequest = (AuthRequest) request;
-            User user = authService.authenticate(
+            User user = authService.authenticateOrRegister(
                     authRequest.getLogin(),
                     authRequest.getPassword()
             );
