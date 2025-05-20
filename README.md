@@ -13,7 +13,7 @@
 
 #Создаем jar и запускаем
 ./gradlew clientJar
-java -jar build/libs/lab6-client.jar helios.cs.ifmo.ru 22222
+java -jar build/libs/lab6-Client.jar helios.cs.ifmo.ru 22222
 
 #P.S. Почему-то именно клиент через build не работает, поэтому запускаю через jar
 ```
