@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 import Client.network.TCPClient;
 import Client.exceptions.BuildObjectException;
-
+import Common.models.User;
 
 /**
  * Класс {@code CommandExecutor} обрабатывает ввод и выполнение команд,
@@ -13,12 +13,15 @@ import Client.exceptions.BuildObjectException;
  */
 public class CommandExecutor {
     private TCPClient client;
+    private final User user;
+
     /**
      * Конструктор для создания исполнитель команд.
      *
      */
-    public CommandExecutor(TCPClient client) {
+    public CommandExecutor(TCPClient client, User user) {
         this.client = client;
+        this.user = user;
     }
 
     /**
