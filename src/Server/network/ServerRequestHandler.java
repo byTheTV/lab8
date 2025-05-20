@@ -6,38 +6,47 @@ import java.util.Map;
 import java.util.function.Function;
 
 import Common.models.StudyGroup;
-import Common.requests.AddRequest;
-import Common.requests.RemoveByIdRequest;
-import Common.requests.RemoveLowerRequest;
-import Common.requests.Request;
-import Common.requests.UpdateIdRequest;
-import Common.responses.AddResponse;
-import Common.responses.AverageOfTransferredStudentsResponse;
-import Common.responses.ClearResponse;
-import Common.responses.GroupCountingByFormOfEducationResponse;
-import Common.responses.HeadResponse;
-import Common.responses.HelpResponse;
-import Common.responses.InfoResponse;
-import Common.responses.PrintFieldAscendingGroupAdminResponse;
-import Common.responses.RemoveByIdResponse;
-import Common.responses.RemoveHeadResponse;
-import Common.responses.RemoveLowerResponse;
-import Common.responses.Response;
-import Common.responses.ShowResponse;
-import Common.responses.UpdateIdResponse;
+import Common.models.User;
+import Server.services.AuthService;
 import Server.collectionManagers.StudyGroupCollectionManager;
+import Common.responses.*;
+import Common.requests.*;
 
 public class ServerRequestHandler implements RequestHandler {
     private final StudyGroupCollectionManager collectionManager;
     private final Map<String, Function<Request, Response>> requestHandlers;
+    private final AuthService authService;
 
-    public ServerRequestHandler(StudyGroupCollectionManager collectionManager) {
+    public ServerRequestHandler(StudyGroupCollectionManager collectionManager, AuthService authService) {
         this.collectionManager = collectionManager;
+        this.authService = authService;
         this.requestHandlers = new HashMap<>();
         initializeRequestHandlers();
     }
 
     private void initializeRequestHandlers() {
+
+        requestHandlers.put("auth", request -> {
+            AuthRequest authRequest = (AuthRequest) request;
+            User user = authService.authenticate(
+                    authRequest.getLogin(),
+                    authRequest.getPassword()
+            );
+
+            if (user != null) {
+                return new AuthResponse(
+                        AuthResponse.AuthStatus.AUTH_SUCCESS,
+                        null,
+                        user.getId()
+                );
+            }
+            return new AuthResponse(
+                    AuthResponse.AuthStatus.AUTH_FAILED,
+                    "Неверные учетные данные",
+                    null
+            );
+        });
+
         requestHandlers.put("add", request -> {
             AddRequest addRequest = (AddRequest) request;
             try {

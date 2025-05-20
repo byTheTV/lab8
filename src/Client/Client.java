@@ -4,7 +4,8 @@ import java.io.IOException;
 import java.net.InetAddress;
 
 import Client.commandManagers.CommandExecutor;
-import Client.network.TCPClient;
+import Client.network.*;
+import Common.models.User;
 
 
 /**
@@ -66,8 +67,17 @@ public class Client {
                 return;
             }
 
+            AuthHandler authHandler = new AuthHandler(client);
+            User user = authHandler.authenticate();
+
+            if (user == null) {
+                System.err.println("Аутентификация не удалась");
+                client.close();
+                return;
+            }
+
             // Создание CommandExecutor и запуск обработки команд
-            CommandExecutor executor = new CommandExecutor(client);
+            CommandExecutor executor = new CommandExecutor(client, user);
             System.out.println("Запуск обработки команд...");
             executor.startExecuting(System.in);
 

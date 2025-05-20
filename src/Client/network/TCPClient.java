@@ -12,7 +12,10 @@ import java.nio.channels.SocketChannel;
 import java.util.concurrent.TimeUnit;
 
 import Common.requests.Request;
+import Common.requests.AuthRequest;
 import Common.responses.Response;
+import Common.responses.AuthResponse;
+
 
 public class TCPClient {
     private InetSocketAddress addr;
@@ -79,6 +82,15 @@ public class TCPClient {
         while (buffer.hasRemaining()) {
             socketChannel.write(buffer);
         }
+    }
+
+    public void sendAuthRequest(String login, String password) throws IOException {
+        AuthRequest request = new AuthRequest(login, password);
+        sendRequest(request);
+    }
+
+    public AuthResponse receiveAuthResponse() throws IOException, ClassNotFoundException {
+        return (AuthResponse) receiveResponse();
     }
 
     public Response receiveResponse() throws IOException, ClassNotFoundException {

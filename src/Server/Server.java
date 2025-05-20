@@ -7,11 +7,14 @@ import Common.models.StudyGroupExample;
 import Server.collectionManagers.StudyGroupCollectionManager;
 import Server.network.ServerRequestHandler;
 import Server.network.TCPServer;
+import Server.services.AuthService;
+
 
 public class Server {
     public static void main(String[] args) {
         StudyGroupCollectionManager collectionManager = new StudyGroupCollectionManager();
-        ServerRequestHandler requestHandler = new ServerRequestHandler(collectionManager);
+        AuthService authService = new AuthService();
+        ServerRequestHandler requestHandler = new ServerRequestHandler(collectionManager, authService);
         TCPServer server = new TCPServer(55555, requestHandler); // Порт 5555
 
         StudyGroupExample example = new StudyGroupExample();
