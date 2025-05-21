@@ -2,12 +2,13 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.InfoRequest;
 import Common.responses.InfoResponse;
 
 public class Info extends NetworkCommand {
-    public Info(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public Info(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
 
     @Override
@@ -22,14 +23,12 @@ public class Info extends NetworkCommand {
 
     @Override
     public void execute() {
-        InfoRequest request = new InfoRequest();
+        InfoRequest request = new InfoRequest(user.getLogin(), user.getPassword());
         InfoResponse response = (InfoResponse) sendAndReceive(request);
 
         if (response != null) {
             if (response.getError() == null) {
-                System.out.println("Тип коллекции: " + response.getCollectionType());
-                System.out.println("Количество элементов: " + response.getSize());
-                System.out.println("Дата инициализации: " + response.getCreationDate());
+                System.out.println(response.toString());
             } else {
                 System.out.println("Ошибка: " + response.getError());
             }
@@ -38,6 +37,6 @@ public class Info extends NetworkCommand {
 
     @Override
     public boolean checkArgument(Object argument) {
-        return argument == null;
+        return true;
     }
 } 

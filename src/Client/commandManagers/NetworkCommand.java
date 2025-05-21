@@ -1,15 +1,18 @@
 package Client.commandManagers;
 
 import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.Request;
 import Common.responses.Response;
 
 public abstract class NetworkCommand extends Command {
     protected final TCPClient tcpClient;
+    protected final User user;
 
-    public NetworkCommand(boolean hasArgument, TCPClient tcpClient) {
+    public NetworkCommand(boolean hasArgument, TCPClient tcpClient, User user) {
         super(hasArgument);
         this.tcpClient = tcpClient;
+        this.user = user;
     }
 
     protected Response sendAndReceive(Request request) {

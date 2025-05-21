@@ -2,6 +2,7 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.AverageOfTransferredStudentsRequest;
 import Common.responses.AverageOfTransferredStudentsResponse;
 
@@ -10,8 +11,8 @@ import Common.responses.AverageOfTransferredStudentsResponse;
  */
 public class AverageOfTransferredStudents extends NetworkCommand {
 
-    public AverageOfTransferredStudents(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public AverageOfTransferredStudents(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
     
     @Override
@@ -26,7 +27,7 @@ public class AverageOfTransferredStudents extends NetworkCommand {
     
     @Override
     public void execute() {
-        AverageOfTransferredStudentsRequest request = new AverageOfTransferredStudentsRequest();
+        AverageOfTransferredStudentsRequest request = new AverageOfTransferredStudentsRequest(user.getLogin(), user.getPassword());
         AverageOfTransferredStudentsResponse response = (AverageOfTransferredStudentsResponse) sendAndReceive(request);
 
         if (response != null) {

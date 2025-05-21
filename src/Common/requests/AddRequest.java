@@ -1,14 +1,14 @@
 package Common.requests;
 
-import Common.models.StudyGroup;
 import java.util.Objects;
 
+import Common.models.StudyGroup;
 
 public class AddRequest extends Request {
     private final StudyGroup studyGroup;
 
-    public AddRequest(StudyGroup studyGroup) {
-        super("add");
+    public AddRequest(StudyGroup studyGroup, String login, String password) {
+        super("add", login, password);
         this.studyGroup = studyGroup;
     }
 

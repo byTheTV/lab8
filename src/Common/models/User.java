@@ -3,7 +3,7 @@ package Common.models;
 public class User {
     private int id;
     private String login;
-    private String passwordHash;
+    private String password;
 
     public int getId() {
         return id;
@@ -13,8 +13,8 @@ public class User {
         return login;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
     public void setId(int id) {
@@ -25,7 +25,7 @@ public class User {
         this.login = login;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

@@ -5,6 +5,7 @@ import Client.network.TCPClient;
 import Client.exceptions.BuildObjectException;
 import Client.exceptions.CommandInterruptedException;
 import Client.exceptions.UnknownCommandException;
+import Common.models.User;
 import java.util.*;
 
 
@@ -22,6 +23,7 @@ public class CommandManager {
     private LinkedHashMap<String, Command> commandMap;
     private Scanner scanner;
     private final TCPClient tcpClient;
+    private final User user;
     private CommandMode currentMode = CommandMode.CLI_UserMode;
 
     /**
@@ -29,29 +31,30 @@ public class CommandManager {
      *
      * @param scanner сканер для чтения ввода
      */
-    public CommandManager(Scanner scanner, TCPClient tcpClient) {
+    public CommandManager(Scanner scanner, TCPClient tcpClient, User user) {
         this.scanner = scanner;
         this.tcpClient = tcpClient;
+        this.user = user;
         initializeCommands();
     }
 
     private void initializeCommands() {
         commandMap = new LinkedHashMap<>();
-        commandMap.put("help", new Help(tcpClient));
-        commandMap.put("info", new Info(tcpClient));
-        commandMap.put("show", new Show(tcpClient));
-        commandMap.put("add", new Add( scanner, this, tcpClient));
-        commandMap.put("update_id", new UpdateId( scanner, this, tcpClient));
-        commandMap.put("remove_by_id", new RemoveById(tcpClient));
-        commandMap.put("clear", new Clear(tcpClient));
+        commandMap.put("help", new Help(tcpClient, user));
+        commandMap.put("info", new Info(tcpClient, user));
+        commandMap.put("show", new Show(tcpClient, user));
+        commandMap.put("add", new Add(scanner, this, tcpClient, user));
+        commandMap.put("update_id", new UpdateId(scanner, this, tcpClient, user));
+        commandMap.put("remove_by_id", new RemoveById(tcpClient, user));
+        commandMap.put("clear", new Clear(tcpClient, user));
         commandMap.put("execute_script", new ExecuteScript(this));
         commandMap.put("exit", new Exit());
-        commandMap.put("head", new Head(tcpClient));
-        commandMap.put("remove_head", new RemoveHead(tcpClient));
-        commandMap.put("remove_lower", new RemoveLower(tcpClient));
-        commandMap.put("average_of_transferred_students", new AverageOfTransferredStudents(tcpClient));
-        commandMap.put("group_counting_by_form_of_education", new GroupCountingByFormOfEducation(tcpClient));
-        commandMap.put("print_field_ascending_group_admin", new PrintFieldAscendingGroupAdmin(tcpClient));
+        commandMap.put("head", new Head(tcpClient, user));
+        commandMap.put("remove_head", new RemoveHead(tcpClient, user));
+        commandMap.put("remove_lower", new RemoveLower(tcpClient, user));
+        commandMap.put("average_of_transferred_students", new AverageOfTransferredStudents(tcpClient, user));
+        commandMap.put("group_counting_by_form_of_education", new GroupCountingByFormOfEducation(tcpClient, user));
+        commandMap.put("print_field_ascending_group_admin", new PrintFieldAscendingGroupAdmin(tcpClient, user));
     }
 
     /*

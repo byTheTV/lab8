@@ -9,8 +9,8 @@ public class UpdateIdRequest extends Request {
     private final Long id;
     private final StudyGroup updatedGroup;
 
-    public UpdateIdRequest(Long id, StudyGroup updatedGroup) {
-        super("update_id");
+    public UpdateIdRequest(Long id, StudyGroup updatedGroup, String login, String password) {
+        super("update_id", login, password);
         this.id = id;
         this.updatedGroup = updatedGroup;
     }

@@ -5,7 +5,7 @@ import Client.exceptions.BuildObjectException;
 /**
  * Интерфейс для реализации команд.
  */
-public interface CommandInterface {
+public interface    CommandInterface {
 
     /**
      * Выполняет команду.

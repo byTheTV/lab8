@@ -1,12 +1,12 @@
 DROP TABLE IF EXISTS study_groups CASCADE;
 DROP TABLE IF EXISTS persons CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS locations CASCADE;
 
 DROP SEQUENCE IF EXISTS study_group_id_seq;
 
 DROP TYPE IF EXISTS form_of_education_enum CASCADE;
 DROP TYPE IF EXISTS color_enum CASCADE;
-DROP TYPE IF EXISTS country_enum CASCADE;
 
 CREATE TYPE form_of_education_enum AS ENUM (
     'DISTANCE_EDUCATION',
@@ -15,16 +15,17 @@ CREATE TYPE form_of_education_enum AS ENUM (
 );
 
 CREATE TYPE color_enum AS ENUM (
+    'GREEN',
     'RED',
-    'BLACK',
-    'ORANGE',
+    'YELLOW',
     'WHITE'
 );
 
-CREATE TYPE country_enum AS ENUM (
-    'GERMANY',
-    'FRANCE',
-    'SPAIN'
+CREATE TABLE locations (
+   id SERIAL PRIMARY KEY,
+   x FLOAT NOT NULL,
+   y FLOAT NOT NULL,
+   z FLOAT NOT NULL
 );
 
 CREATE TABLE users (
@@ -34,12 +35,12 @@ CREATE TABLE users (
 );
 
 CREATE TABLE persons (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255) NOT NULL,
-    birthday TIMESTAMP NOT NULL,
-    height INTEGER NOT NULL CHECK (height > 0),
-    hair_color color_enum,
-    nationality country_enum
+     id SERIAL PRIMARY KEY,
+     name VARCHAR(255) NOT NULL,
+     birthday DATE, -- Может быть NULL, тип DATE вместо TIMESTAMP
+     passport_id VARCHAR(26) UNIQUE, -- Уникальное, длина до 26
+     eye_color color_enum NOT NULL,
+     location_id INTEGER NOT NULL REFERENCES locations(id)
 );
 
 CREATE SEQUENCE study_group_id_seq START 1;

@@ -2,12 +2,13 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.ClearRequest;
 import Common.responses.ClearResponse;
 
 public class Clear extends NetworkCommand {
-    public Clear(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public Clear(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
 
     @Override
@@ -22,7 +23,7 @@ public class Clear extends NetworkCommand {
 
     @Override
     public void execute() {
-        ClearRequest request = new ClearRequest();
+        ClearRequest request = new ClearRequest(user.getLogin(), user.getPassword());
         ClearResponse response = (ClearResponse) sendAndReceive(request);
 
         if (response != null) {

@@ -2,20 +2,21 @@ package Client.commandManagers.commands;
 
 import java.util.Scanner;
 
-import Client.commandManagers.NetworkCommand;
 import Client.commandManagers.CommandManager;
 import Client.commandManagers.CommandMode;
 import Client.commandManagers.InputReader;
-import Common.models.StudyGroup;
-import Common.requests.AddRequest;
+import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.StudyGroup;
+import Common.models.User;
+import Common.requests.AddRequest;
 import Common.responses.AddResponse;
 
 public class Add extends NetworkCommand {
     private final CommandManager commandManager;
 
-    public Add(Scanner scanner, CommandManager commandManager, TCPClient tcpClient) {
-        super(false, tcpClient);
+    public Add(Scanner scanner, CommandManager commandManager, TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
         this.commandManager = commandManager;
     }
 
@@ -55,7 +56,7 @@ public class Add extends NetworkCommand {
                 studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null));
             }
 
-            AddRequest request = new AddRequest(studyGroup);
+            AddRequest request = new AddRequest(studyGroup, user.getLogin(), user.getPassword());
             AddResponse response = (AddResponse) sendAndReceive(request);
 
             if (response != null) {

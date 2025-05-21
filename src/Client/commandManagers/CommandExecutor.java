@@ -3,8 +3,8 @@ package Client.commandManagers;
 import java.io.InputStream;
 import java.util.Scanner;
 
-import Client.network.TCPClient;
 import Client.exceptions.BuildObjectException;
+import Client.network.TCPClient;
 import Common.models.User;
 
 /**
@@ -33,7 +33,7 @@ public class CommandExecutor {
 
     public void startExecuting(InputStream in) {
         try (Scanner scanner = new Scanner(in)) {
-            CommandManager commandManager = new CommandManager(scanner, client);
+            CommandManager commandManager = new CommandManager(scanner, client, user);
 
 
             if (commandManager.getCommandMap().containsKey("help")) {

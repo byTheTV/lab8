@@ -1,9 +1,10 @@
 package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.GroupCountingByFormOfEducationRequest;
 import Common.responses.GroupCountingByFormOfEducationResponse;
-import Client.network.TCPClient;
 
 /**
  * Команда group_counting_by_form_of_education: группирует элементы коллекции по значению поля formOfEducation
@@ -11,8 +12,8 @@ import Client.network.TCPClient;
  */
 public class GroupCountingByFormOfEducation extends NetworkCommand {
 
-    public GroupCountingByFormOfEducation(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public GroupCountingByFormOfEducation(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
     
     @Override
@@ -27,7 +28,7 @@ public class GroupCountingByFormOfEducation extends NetworkCommand {
     
     @Override
     public void execute() {
-        GroupCountingByFormOfEducationRequest request = new GroupCountingByFormOfEducationRequest();
+        GroupCountingByFormOfEducationRequest request = new GroupCountingByFormOfEducationRequest(user.getLogin(), user.getPassword());
         GroupCountingByFormOfEducationResponse response = (GroupCountingByFormOfEducationResponse) sendAndReceive(request);
 
         if (response != null) {

@@ -2,7 +2,7 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
-import Common.models.StudyGroup;
+import Common.models.User;
 import Common.requests.HeadRequest;
 import Common.responses.HeadResponse;
 
@@ -11,8 +11,8 @@ import Common.responses.HeadResponse;
  */
 public class Head extends NetworkCommand {
 
-    public Head(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public Head(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
     
     @Override
@@ -27,18 +27,12 @@ public class Head extends NetworkCommand {
     
     @Override
     public void execute() {
-        HeadRequest request = new HeadRequest();
+        HeadRequest request = new HeadRequest(user.getLogin(), user.getPassword());
         HeadResponse response = (HeadResponse) sendAndReceive(request);
 
         if (response != null) {
             if (response.getError() == null) {
-                StudyGroup group = response.getStudyGroup();
-                if (group != null) {
-                    System.out.println("Первый элемент коллекции:");
-                    System.out.println(group);
-                } else {
-                    System.out.println("Коллекция пуста");
-                }
+                System.out.println(response.toString());
             } else {
                 System.out.println("Ошибка: " + response.getError());
             }

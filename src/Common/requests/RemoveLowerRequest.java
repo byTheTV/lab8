@@ -6,8 +6,8 @@ import java.util.Objects;
 public class RemoveLowerRequest extends Request {
      private final Long id; // Теперь храним ID
 
-    public RemoveLowerRequest(Long id) {
-        super("remove_lower");
+    public RemoveLowerRequest( Long id, String login, String password) {
+        super("remove_lower", login, password);
         this.id = id;
     }
 

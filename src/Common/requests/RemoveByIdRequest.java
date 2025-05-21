@@ -5,8 +5,8 @@ import java.util.Objects;
 public class RemoveByIdRequest extends Request {
     private final Long id;
 
-    public RemoveByIdRequest(Long id) {
-        super("remove_by_id");
+    public RemoveByIdRequest(Long id, String login, String password) {
+        super("remove_by_id", login, password);
         this.id = id;
     }
 

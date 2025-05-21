@@ -10,12 +10,13 @@ import Common.models.StudyGroup;
 import Common.requests.UpdateIdRequest;
 import Common.responses.UpdateIdResponse;
 import Client.network.TCPClient;
+import Common.models.User;
 
 public class UpdateId extends NetworkCommand {
     private final CommandManager commandManager;
 
-    public UpdateId(Scanner scanner, CommandManager commandManager, TCPClient tcpClient) {
-        super(true, tcpClient);
+    public UpdateId(Scanner scanner, CommandManager commandManager, TCPClient tcpClient, User user) {
+        super(true, tcpClient, user);
         this.commandManager = commandManager;
     }
 
@@ -54,7 +55,7 @@ public class UpdateId extends NetworkCommand {
                 studyGroup.setGroupAdmin(inputReader.readGroupAdmin(null));
             }
 
-            UpdateIdRequest request = new UpdateIdRequest(id, studyGroup);
+            UpdateIdRequest request = new UpdateIdRequest(id, studyGroup, user.getLogin(), user.getPassword());
             UpdateIdResponse response = (UpdateIdResponse) sendAndReceive(request);
 
             if (response != null) {

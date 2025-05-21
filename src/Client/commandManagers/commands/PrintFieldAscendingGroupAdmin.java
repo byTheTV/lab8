@@ -1,10 +1,10 @@
 package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
+import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.PrintFieldAscendingGroupAdminRequest;
 import Common.responses.PrintFieldAscendingGroupAdminResponse;
-import Client.network.TCPClient;
-
 
 /**
  * Команда print_field_ascending_group_admin: выводит значения поля groupAdmin всех элементов 
@@ -12,8 +12,8 @@ import Client.network.TCPClient;
  */
 public class PrintFieldAscendingGroupAdmin extends NetworkCommand {
 
-    public PrintFieldAscendingGroupAdmin(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public PrintFieldAscendingGroupAdmin(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
     
     @Override
@@ -28,7 +28,7 @@ public class PrintFieldAscendingGroupAdmin extends NetworkCommand {
     
     @Override
     public void execute() {
-        PrintFieldAscendingGroupAdminRequest request = new PrintFieldAscendingGroupAdminRequest();
+        PrintFieldAscendingGroupAdminRequest request = new PrintFieldAscendingGroupAdminRequest(user.getLogin(), user.getPassword());
         PrintFieldAscendingGroupAdminResponse response = (PrintFieldAscendingGroupAdminResponse) sendAndReceive(request);
 
         if (response != null) {

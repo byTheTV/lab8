@@ -1,8 +1,7 @@
 package Common.requests;
 
-
 public class RemoveHeadRequest extends Request {
-    public RemoveHeadRequest() {
-        super("remove_head");
+    public RemoveHeadRequest(String login, String password) {
+        super("remove_head", login, password);
     }
 }

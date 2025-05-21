@@ -1,7 +1,7 @@
 package Common.requests;
 
 public class ShowRequest extends Request {
-    public ShowRequest() {
-        super("show");
+    public ShowRequest(String login, String password) {
+        super("show", login, password);
     }
 }

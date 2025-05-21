@@ -2,7 +2,7 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
-import Common.models.StudyGroup;
+import Common.models.User;
 import Common.requests.RemoveHeadRequest;
 import Common.responses.RemoveHeadResponse;
 
@@ -11,8 +11,8 @@ import Common.responses.RemoveHeadResponse;
  */
 public class RemoveHead extends NetworkCommand {
 
-    public RemoveHead(TCPClient tcpClient) {
-        super(false, tcpClient);
+    public RemoveHead(TCPClient tcpClient, User user) {
+        super(false, tcpClient, user);
     }
     
     @Override
@@ -22,23 +22,17 @@ public class RemoveHead extends NetworkCommand {
     
     @Override
     public String getDescr() {
-        return "вывести первый элемент коллекции и удалить его";
+        return "удалить первый элемент коллекции";
     }
     
     @Override
     public void execute() {
-        RemoveHeadRequest request = new RemoveHeadRequest();
+        RemoveHeadRequest request = new RemoveHeadRequest(user.getLogin(), user.getPassword());
         RemoveHeadResponse response = (RemoveHeadResponse) sendAndReceive(request);
 
         if (response != null) {
             if (response.getError() == null) {
-                StudyGroup group = response.getStudyGroup();
-                if (group != null) {
-                    System.out.println("Удален первый элемент коллекции:");
-                    System.out.println(group);
-                } else {
-                    System.out.println("Коллекция пуста");
-                }
+                System.out.println("Первый элемент успешно удален");
             } else {
                 System.out.println("Ошибка: " + response.getError());
             }

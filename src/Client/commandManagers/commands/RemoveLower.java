@@ -2,6 +2,7 @@ package Client.commandManagers.commands;
 
 import Client.commandManagers.NetworkCommand;
 import Client.network.TCPClient;
+import Common.models.User;
 import Common.requests.RemoveLowerRequest;
 import Common.responses.RemoveLowerResponse;
 
@@ -11,8 +12,8 @@ import Common.responses.RemoveLowerResponse;
  */
 public class RemoveLower extends NetworkCommand {
 
-    public RemoveLower(TCPClient tcpClient) {
-        super(true, tcpClient);
+    public RemoveLower(TCPClient tcpClient, User user) {
+        super(true, tcpClient, user);
     }
     
     @Override
@@ -27,21 +28,36 @@ public class RemoveLower extends NetworkCommand {
     
     @Override
     public void execute() {
-        RemoveLowerRequest request = new RemoveLowerRequest(Long.parseLong(argument));
-        RemoveLowerResponse response = (RemoveLowerResponse) sendAndReceive(request);
+        try {
+            Long id = Long.parseLong(getArgument());
+            RemoveLowerRequest request = new RemoveLowerRequest(id, user.getLogin(), user.getPassword());
+            RemoveLowerResponse response = (RemoveLowerResponse) sendAndReceive(request);
 
-        if (response != null) {
-            if (response.getError() == null) {
-                System.out.println("Удалено элементов: " + response.getRemovedCount());
-            } else {
-                System.out.println("Ошибка: " + response.getError());
+            if (response != null) {
+                if (response.getError() == null) {
+                    System.out.println("Элементы, меньшие чем элемент с id " + id + ", успешно удалены");
+                } else {
+                    System.out.println("Ошибка: " + response.getError());
+                }
             }
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка: id должен быть числом");
         }
     }
     
     @Override
     public boolean checkArgument(Object argument) {
-        return argument instanceof Integer;
+        if (argument == null) {
+            System.out.println("Ошибка: id не указан");
+            return false;
+        }
+        try {
+            Long.parseLong((String) argument);
+            return true;
+        } catch (NumberFormatException e) {
+            System.out.println("Ошибка: id должен быть числом");
+            return false;
+        }
     }
 } 
  
