@@ -1,0 +1,67 @@
+Параметры подключения: localhost:55555
+Текущая рабочая директория: D:\_projs\lab7
+Попытка подключения к серверу: localhost:55555
+
+Успешное подключение к серверу: localhost:55555
+Информация о подключении:
+Хост: localhost
+Порт: 55555
+Статус: Активно
+Введите логин: zxc
+Введите пароль: zxc
+Запуск обработки команд...
+Отправлена команда
+help
+Командный режим запущен. Введите команды (для выхода введите 'exit'):
+Ошибка при отправке/получении данных: Timeout while reading data
+help
+> Отправлена команда
+help
+Доступные команды:
+add - Add new element
+update_id - Update element by ID
+remove_head - Remove and return first element
+group_counting_by_form_of_education - Group elements by form of education
+execute_script - Complete script from file
+show - Show all elements
+clear - Clear collection
+average_of_transferred_students - Calculate average of transferred students
+remove_by_id - Remove element by ID
+remove_lower - Remove elements lower than given
+head - Show first element
+help - Show available commands
+print_field_ascending_group_admin - Print group admin names in ascending order
+info - Show collection information
+show
+> Отправлена команда
+show
+----------------------------------------
+StudyGroup Details:
+----------------------------------------
+ID                 : 1
+Name               : Группа 101
+Coordinates        : Coordinates{x=100, y=200}
+Creation Date      : 2025-05-21T18:12:11.498872500+03:00[Europe/Moscow]
+Students Count     : 30
+Expelled Students  : 2
+Transferred Students: 1
+Form Of Education  : FULL_TIME_EDUCATION
+Group Admin:
+    ====================================
+                Person Details
+    ====================================
+    Name         : Иван Иванов
+    Birthday     : 1995-05-15
+    Passport ID  : AB123456
+    Eye Color    : GREEN
+    Location     : ----------------------------------
+              Location Details
+    ----------------------------------
+    X: 10.5
+    Y: 20.5
+    Z: 30.5
+    ----------------------------------
+
+    ====================================
+----------------------------------------
+

@@ -1,3 +1,4 @@
+// TCPClient.java
 package Client.network;
 
 import java.io.ByteArrayInputStream;
@@ -16,14 +17,12 @@ import Common.requests.AuthRequest;
 import Common.responses.Response;
 import Common.responses.AuthResponse;
 
-
 public class TCPClient {
     private InetSocketAddress addr;
     private SocketChannel socketChannel;
-    private static final int MAX_TIMEOUT = 30000; // Increased timeout to 30 seconds
-
+    private static final int MAX_TIMEOUT = 30000;
     private static final int MAX_ATTEMPTS = 3;
-    private static final int READ_TIMEOUT = 10000; // 10 seconds for read operations
+    private static final int READ_TIMEOUT = 30000;
 
     public TCPClient(InetAddress addr, int port) throws IOException {
         this.addr = new InetSocketAddress(addr, port);
@@ -43,9 +42,8 @@ public class TCPClient {
                     if (System.currentTimeMillis() - startTime > MAX_TIMEOUT) {
                         throw new IOException("Connection timeout");
                     }
-                    TimeUnit.MILLISECONDS.sleep(10000);
+                    TimeUnit.MILLISECONDS.sleep(100);
                 }
-                TimeUnit.SECONDS.sleep(5);
                 return;
             } catch (IOException | InterruptedException e) {
                 attempts++;
@@ -67,14 +65,12 @@ public class TCPClient {
             throw new IOException("Not connected to server");
         }
 
-        // Сериализация объекта
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
             oos.writeObject(request);
         }
         byte[] requestBytes = baos.toByteArray();
 
-        // Отправка размера и данных
         ByteBuffer buffer = ByteBuffer.allocate(4 + requestBytes.length);
         buffer.putInt(requestBytes.length).put(requestBytes);
         buffer.flip();
@@ -95,29 +91,31 @@ public class TCPClient {
 
     public Response receiveResponse() throws IOException, ClassNotFoundException {
         if (!isConnected()) {
-            throw new IOException("Not connected to server");
+            throw new IOException("Соединение разорвано сервером");
         }
 
-        // Чтение размера ответа
-        ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
-        readFully(sizeBuffer, READ_TIMEOUT);
-        sizeBuffer.flip();
-        int responseSize = sizeBuffer.getInt();
+        try {
+            ByteBuffer sizeBuffer = ByteBuffer.allocate(4);
+            readFully(sizeBuffer, READ_TIMEOUT);
+            sizeBuffer.flip();
+            int responseSize = sizeBuffer.getInt();
 
-        // Чтение ответа
-        ByteBuffer responseBuffer = ByteBuffer.allocate(responseSize);
-        readFully(responseBuffer, READ_TIMEOUT);
-        responseBuffer.flip();
+            ByteBuffer responseBuffer = ByteBuffer.allocate(responseSize);
+            readFully(responseBuffer, READ_TIMEOUT);
+            responseBuffer.flip();
 
-        // Десериализация ответа
-        byte[] responseBytes = new byte[responseSize];
-        responseBuffer.get(responseBytes);
-        try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(responseBytes))) {
-            return (Response) ois.readObject();
+            byte[] responseBytes = new byte[responseSize];
+            responseBuffer.get(responseBytes);
+
+            try (ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(responseBytes))) {
+                return (Response) ois.readObject();
+            }
+        } catch (IOException e) {
+            close();
+            throw new IOException("Сервер принудительно разорвал соединение", e);
         }
     }
 
-    // Вспомогательный метод для полного чтения данных с таймаутом
     private void readFully(ByteBuffer buffer, int timeoutMs) throws IOException {
         long startTime = System.currentTimeMillis();
         while (buffer.hasRemaining()) {

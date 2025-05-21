@@ -34,7 +34,8 @@ public class CommandExecutor {
     public void startExecuting(InputStream in) {
         try (Scanner scanner = new Scanner(in)) {
             CommandManager commandManager = new CommandManager(scanner, client);
-            
+
+
             if (commandManager.getCommandMap().containsKey("help")) {
                 try {
                     commandManager.getCommandMap().get("help").execute();
@@ -42,7 +43,7 @@ public class CommandExecutor {
                     System.err.println("Ошибка выполнения команды help: " + e.getMessage());
                 }
             }
-            
+
             System.out.println("Командный режим запущен. Введите команды (для выхода введите 'exit'):");
             while (scanner.hasNextLine()) {
                 System.out.print("> ");
