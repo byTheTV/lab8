@@ -1,77 +1,45 @@
 package Server.collectionManagers;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.ArrayDeque;
 import java.util.List;
 import java.util.Map;
 
 import Common.models.StudyGroup;
+import Server.database.DatabaseManager;
+import Server.database.StudyGroupDAO;
 
 /**
  * Class that manages the collection of StudyGroup objects.
  * Provides methods for adding, removing, and manipulating the collection.
  */
 public class StudyGroupCollectionManager {
-    private final ArrayDeque<StudyGroup> collection;
+    private final StudyGroupDAO dao;
     private final LocalDateTime creationDate;
     private final String collectionType;
-    private String dataFile;
 
     public StudyGroupCollectionManager() {
-        this.creationDate = LocalDateTime.now();
-        this.collection = new ArrayDeque<>();
-        this.collectionType = collection.getClass().getSimpleName();
-    }
-
-    /**
-     * Инициализирует путь к файлу с данными.
-     *
-     * @param filename имя файла с данными
-     * @return true, если инициализация прошла успешно, иначе false
-     */
-    public boolean initializeData(String filename) {
-        if (filename == null || filename.trim().isEmpty()) {
-            System.err.println("Имя файла не может быть пустым!");
-            return false;
-        }
-        this.dataFile = filename;
-        return true;
-    }
-
-    /*
-    public boolean load() {
         try {
-            Collection<StudyGroup> loadedGroups = XMLReader.readStudyGroupCollection(dataFile);
-            collection.clear();
-            collection.addAll(loadedGroups);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Ошибка при загрузке коллекции: " + e.getMessage());
-     //       e.printStackTrace();
-            return false;
+            this.dao = new StudyGroupDAO(DatabaseManager.getConnection());
+            this.creationDate = LocalDateTime.now();
+            this.collectionType = "DatabaseCollection";
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to initialize database connection", e);
         }
     }
-    
-
-    
-    public boolean saveCollection() {
-        try {
-            XMLWriter.writeStudyGroupCollection(collection, dataFile);
-            return true;
-        } catch (Exception e) {
-            System.err.println("Ошибка при сохранении коллекции: " + e.getMessage());
-            return false;
-        }
-    }
-    */
-
 
     /**
      * Adds a study group to the collection
      * @param studyGroup the study group to add
      */
     public void add(StudyGroup studyGroup) {
-        collection.add(studyGroup);
+        try {
+            dao.add(studyGroup, 1); // TODO: Pass actual user ID
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to add study group: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to add study group", e);
+        }
     }
 
     /**
@@ -80,7 +48,11 @@ public class StudyGroupCollectionManager {
      * @return true if removed successfully, false if not found
      */
     public boolean removeById(long id) {
-        return collection.removeIf(group -> group.getId() == id);
+        try {
+            return dao.removeById(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove study group", e);
+        }
     }
 
     /**
@@ -90,30 +62,35 @@ public class StudyGroupCollectionManager {
      * @return true if updated successfully, false if not found
      */
     public boolean updateById(long id, StudyGroup newStudyGroup) {
-        for (StudyGroup group : collection) {
-            if (group.getId() == id) {
-                collection.remove(group);
-                collection.add(newStudyGroup);
-                return true;
-            }
+        try {
+            return dao.updateById(id, newStudyGroup);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to update study group", e);
         }
-        return false;
     }
 
     /**
      * Clears the collection
      */
     public void clear() {
-        collection.clear();
+        try {
+            dao.clear();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to clear collection", e);
+        }
     }
-
 
     /**
      * Returns the first element of the collection
      * @return the first StudyGroup or null if collection is empty
      */
     public StudyGroup getHead() {
-        return collection.isEmpty() ? null : collection.getFirst();
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            return groups.isEmpty() ? null : groups.get(0);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get head element", e);
+        }
     }
 
     /**
@@ -121,7 +98,17 @@ public class StudyGroupCollectionManager {
      * @return the removed StudyGroup or null if collection is empty
      */
     public StudyGroup removeHead() {
-        return collection.isEmpty() ? null : collection.removeFirst();
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            if (groups.isEmpty()) {
+                return null;
+            }
+            StudyGroup head = groups.get(0);
+            dao.removeById(head.getId());
+            return head;
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove head element", e);
+        }
     }
 
     /**
@@ -129,28 +116,47 @@ public class StudyGroupCollectionManager {
      * @param studyGroup the study group to compare with
      */
     public int removeLower(StudyGroup studyGroup) {
-        int initialSize = collection.size();
-        collection.removeIf(group -> group.compareTo(studyGroup) < 0);
-        return initialSize - collection.size();
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            int initialSize = groups.size();
+            for (StudyGroup group : groups) {
+                if (group.compareTo(studyGroup) < 0) {
+                    dao.removeById(group.getId());
+                }
+            }
+            return initialSize - dao.getAll().size();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to remove lower elements", e);
+        }
     }
+
     /**
      * Calculates average of transferred students across all groups
      * @return average number of transferred students
      */
     public double getAverageOfTransferredStudents() {
-        if (collection.isEmpty()) return 0;
-        return collection.stream()
-                .mapToInt(StudyGroup::getTransferredStudents)
-                .average()
-                .orElse(0);
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            if (groups.isEmpty()) return 0;
+            return groups.stream()
+                    .mapToInt(group -> (int)group.getTransferredStudents())
+                    .average()
+                    .orElse(0);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to calculate average", e);
+        }
     }
 
     /**
      * Gets the collection
      * @return the collection of study groups
      */
-    public ArrayDeque<StudyGroup> getCollection() {
-        return collection;
+    public List<StudyGroup> getCollection() {
+        try {
+            return dao.getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get collection", e);
+        }
     }
 
     /**
@@ -174,9 +180,12 @@ public class StudyGroupCollectionManager {
      * @return number of elements in collection
      */
     public int getSize() {
-        return collection.size();
+        try {
+            return dao.getAll().size();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get collection size", e);
+        }
     }
-
 
     /**
      * Возвращает строковое представление состояния коллекции.
@@ -189,21 +198,32 @@ public class StudyGroupCollectionManager {
           .append("Размер коллекции: ").append(getSize()).append("\n")
           .append("Дата создания: ").append(creationDate).append("\n")
           .append("Элементы коллекции:\n");
-        for (StudyGroup group : collection) {
-            sb.append(group).append("\n");
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            for (StudyGroup group : groups) {
+                sb.append(group).append("\n");
+            }
+        } catch (SQLException e) {
+            sb.append("Ошибка при получении элементов коллекции: ").append(e.getMessage());
         }
         return sb.toString();
     }
 
     public StudyGroup getById(Long id) {
-        return collection.stream()
-                .filter(group -> group.getId().equals(id.intValue()))
-                .findFirst()
-                .orElse(null);
+        try {
+            return dao.getById(id);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to get study group by ID", e);
+        }
     }
 
     public Map<String, Integer> groupCountingByFormOfEducation() {
-        return StudyGroupCollectionUtils.groupCountingByFormOfEducation(collection);
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            return StudyGroupCollectionUtils.groupCountingByFormOfEducation(groups);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to count groups by form of education", e);
+        }
     }
 
     public Map<String, String> getCommandDescriptions() {
@@ -211,15 +231,28 @@ public class StudyGroupCollectionManager {
     }
 
     public List<String> printFieldAscendingGroupAdmin() {
-        return StudyGroupCollectionUtils.printFieldAscendingGroupAdmin(collection);
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            return StudyGroupCollectionUtils.printFieldAscendingGroupAdmin(groups);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to print field ascending group admin", e);
+        }
     }
 
     public List<StudyGroup> show() {
-        return StudyGroupCollectionUtils.show(collection);
+        try {
+            return dao.getAll();
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to show collection", e);
+        }
     }
 
     public double averageOfTransferredStudents() {
-        return StudyGroupCollectionUtils.averageOfTransferredStudents(collection);
+        try {
+            List<StudyGroup> groups = dao.getAll();
+            return StudyGroupCollectionUtils.averageOfTransferredStudents(groups);
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to calculate average of transferred students", e);
+        }
     }
-
 } 

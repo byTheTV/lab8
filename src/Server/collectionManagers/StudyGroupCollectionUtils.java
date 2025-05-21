@@ -1,12 +1,11 @@
 package Server.collectionManagers;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
+import Common.models.FormOfEducation;
 import Common.models.StudyGroup;
 
 /**
@@ -19,12 +18,18 @@ public class StudyGroupCollectionUtils {
      * @param collection the collection to process
      * @return Map with form of education as key and count as value
      */
-    public static Map<String, Integer> groupCountingByFormOfEducation(ArrayDeque<StudyGroup> collection) {
-        return collection.stream()
-                .collect(Collectors.groupingBy(
-                        group -> group.getFormOfEducation().toString(),
-                        Collectors.summingInt(e -> 1)
-                ));
+    public static Map<String, Integer> groupCountingByFormOfEducation(List<StudyGroup> collection) {
+        Map<String, Integer> counts = new HashMap<>();
+        for (FormOfEducation form : FormOfEducation.values()) {
+            counts.put(form.toString(), 0);
+        }
+        
+        for (StudyGroup group : collection) {
+            String form = group.getFormOfEducation().toString();
+            counts.put(form, counts.get(form) + 1);
+        }
+        
+        return counts;
     }
 
     /**
@@ -33,20 +38,19 @@ public class StudyGroupCollectionUtils {
      */
     public static Map<String, String> getCommandDescriptions() {
         Map<String, String> descriptions = new HashMap<>();
-        descriptions.put("help", "Show available commands");
-        descriptions.put("info", "Show collection information");
-        descriptions.put("show", "Show all elements");
-        descriptions.put("add", "Add new element");
-        descriptions.put("update_id", "Update element by ID");
-        descriptions.put("remove_by_id", "Remove element by ID");
-        descriptions.put("execute_script", "Complete script from file");
-        descriptions.put("clear", "Clear collection");
-        descriptions.put("head", "Show first element");
-        descriptions.put("remove_head", "Remove and return first element");
-        descriptions.put("remove_lower", "Remove elements lower than given");
-        descriptions.put("average_of_transferred_students", "Calculate average of transferred students");
-        descriptions.put("group_counting_by_form_of_education", "Group elements by form of education");
-        descriptions.put("print_field_ascending_group_admin", "Print group admin names in ascending order");
+        descriptions.put("add", "Добавить новый элемент в коллекцию");
+        descriptions.put("clear", "Очистить коллекцию");
+        descriptions.put("group_counting_by_form_of_education", "Сгруппировать элементы коллекции по значению поля formOfEducation");
+        descriptions.put("head", "Вывести первый элемент коллекции");
+        descriptions.put("help", "Вывести справку по доступным командам");
+        descriptions.put("info", "Вывести информацию о коллекции");
+        descriptions.put("print_field_ascending_group_admin", "Вывести значения поля groupAdmin всех элементов в порядке возрастания");
+        descriptions.put("remove_by_id", "Удалить элемент из коллекции по его id");
+        descriptions.put("remove_head", "Вывести и удалить первый элемент коллекции");
+        descriptions.put("remove_lower", "Удалить из коллекции все элементы, меньшие, чем заданный");
+        descriptions.put("show", "Вывести все элементы коллекции");
+        descriptions.put("update_id", "Обновить значение элемента коллекции, id которого равен заданному");
+        descriptions.put("average_of_transferred_students", "Вывести среднее значение поля transferredStudents для всех элементов коллекции");
         return descriptions;
     }
 
@@ -55,11 +59,11 @@ public class StudyGroupCollectionUtils {
      * @param collection the collection to process
      * @return List of admin names
      */
-    public static List<String> printFieldAscendingGroupAdmin(ArrayDeque<StudyGroup> collection) {
+    public static List<String> printFieldAscendingGroupAdmin(List<StudyGroup> collection) {
         return collection.stream()
                 .map(group -> group.getGroupAdmin().getName())
                 .sorted()
-                .collect(Collectors.toList());
+                .toList();
     }
 
     /**
@@ -67,7 +71,7 @@ public class StudyGroupCollectionUtils {
      * @param collection the collection to show
      * @return List of study groups
      */
-    public static List<StudyGroup> show(ArrayDeque<StudyGroup> collection) {
+    public static List<StudyGroup> show(List<StudyGroup> collection) {
         return new ArrayList<>(collection);
     }
 
@@ -76,13 +80,11 @@ public class StudyGroupCollectionUtils {
      * @param collection the collection to process
      * @return average value
      */
-    public static double averageOfTransferredStudents(ArrayDeque<StudyGroup> collection) {
-        if (collection.isEmpty()) {
-            throw new IllegalStateException("Collection is empty");
-        }
+    public static double averageOfTransferredStudents(List<StudyGroup> collection) {
+        if (collection.isEmpty()) return 0;
         return collection.stream()
-                .mapToInt(StudyGroup::getTransferredStudents)
+                .mapToInt(group -> (int)group.getTransferredStudents())
                 .average()
-                .orElse(0.0);
+                .orElse(0);
     }
 } 

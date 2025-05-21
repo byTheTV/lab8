@@ -19,9 +19,9 @@ public class Server {
             TCPServer server = new TCPServer(55555, requestHandler, 4, 8, 4); // Порт 5555
       //      TCPServer server = new TCPServer(55555, requestHandler); // Порт 5555
 
-            StudyGroupExample example = new StudyGroupExample();
-            StudyGroup studyGroupEx = example.StudyGroupExample();
-            collectionManager.add(studyGroupEx);
+            //StudyGroupExample example = new StudyGroupExample();
+            //StudyGroup studyGroupEx = example.StudyGroupExample();
+            //collectionManager.add(studyGroupEx);
 
             try {
                 server.start();

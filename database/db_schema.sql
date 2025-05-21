@@ -53,7 +53,7 @@ CREATE TABLE study_groups (
     creation_date DATE NOT NULL DEFAULT CURRENT_DATE,
     students_count BIGINT NOT NULL CHECK (students_count > 0),
     expelled_students INTEGER CHECK (expelled_students IS NULL OR expelled_students > 0),
-    transferred_students BIGINT CHECK (transferred_students IS NULL OR transferred_students > 0),
+    transferred_students INTEGER CHECK (transferred_students IS NULL OR transferred_students > 0),
     form_of_education form_of_education_enum NOT NULL,
     group_admin_id INTEGER NOT NULL REFERENCES persons(id),
     user_id INTEGER NOT NULL REFERENCES users(id)
