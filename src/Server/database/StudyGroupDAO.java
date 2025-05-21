@@ -139,53 +139,21 @@ public class StudyGroupDAO {
         }
     }
 
-    public boolean removeById(long id) throws SQLException {
-        String sql = "DELETE FROM study_groups WHERE id = ?";
+    // Получение ID пользователя по логину
+    public int getUserIdByLogin(String login) throws SQLException {
+        String sql = "SELECT id FROM users WHERE username = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
-            return stmt.executeUpdate() > 0;
-        }
-    }
-
-    public boolean updateById(long id, StudyGroup newGroup) throws SQLException {
-        String sql = "UPDATE study_groups SET name = ?, coordinates_x = ?, coordinates_y = ?, " +
-                    "students_count = ?, expelled_students = ?, transferred_students = ?, " +
-                    "form_of_education = ? WHERE id = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, newGroup.getName());
-            stmt.setLong(2, newGroup.getCoordinates().getX());
-            stmt.setLong(3, newGroup.getCoordinates().getY());
-            stmt.setLong(4, newGroup.getStudentsCount());
-            stmt.setInt(5, newGroup.getExpelledStudents());
-            stmt.setLong(6, newGroup.getTransferredStudents());
-            stmt.setObject(7, newGroup.getFormOfEducation().name(), java.sql.Types.OTHER);
-            stmt.setLong(8, id);
-
-            return stmt.executeUpdate() > 0;
-        }
-    }
-
-    public void clear() throws SQLException {
-        String sql = "DELETE FROM study_groups";
-        try (Statement stmt = connection.createStatement()) {
-            stmt.executeUpdate(sql);
-        }
-    }
-
-    public StudyGroup getById(long id) throws SQLException {
-        String sql = "SELECT * FROM study_groups WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setLong(1, id);
+            stmt.setString(1, login);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    return mapResultSetToStudyGroup(rs);
+                    return rs.getInt("id");
                 }
+                throw new SQLException("User not found: " + login);
             }
         }
-        return null;
     }
 
+    // Получение всех групп (для просмотра)
     public List<StudyGroup> getAll() throws SQLException {
         List<StudyGroup> groups = new ArrayList<>();
         String sql = "SELECT * FROM study_groups ORDER BY id";
@@ -204,6 +172,102 @@ public class StudyGroupDAO {
             }
         }
         return groups;
+    }
+
+    // Получение групп пользователя
+    public List<StudyGroup> getUserGroups(String login) throws SQLException {
+        List<StudyGroup> groups = new ArrayList<>();
+        int userId = getUserIdByLogin(login);
+        String sql = "SELECT * FROM study_groups WHERE user_id = ? ORDER BY id";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    try {
+                        StudyGroup group = mapResultSetToStudyGroup(rs);
+                        if (group != null) {
+                            groups.add(group);
+                        }
+                    } catch (SQLException e) {
+                        System.err.println("Error mapping study group: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return groups;
+    }
+
+    // Проверка владельца группы
+    public boolean isGroupOwner(int groupId, String login) throws SQLException {
+        int userId = getUserIdByLogin(login);
+        String sql = "SELECT COUNT(*) FROM study_groups WHERE id = ? AND user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, groupId);
+            stmt.setInt(2, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        }
+    }
+
+    // Модифицированный метод удаления
+    public boolean removeById(long id, String login) throws SQLException {
+        if (!isGroupOwner((int)id, login)) {
+            throw new SQLException("You don't have permission to remove this group");
+        }
+        String sql = "DELETE FROM study_groups WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    // Модифицированный метод обновления
+    public boolean updateById(long id, StudyGroup newGroup, String login) throws SQLException {
+        if (!isGroupOwner((int)id, login)) {
+            throw new SQLException("You don't have permission to update this group");
+        }
+        String sql = "UPDATE study_groups SET name = ?, coordinates_x = ?, coordinates_y = ?, " +
+                    "students_count = ?, expelled_students = ?, transferred_students = ?, " +
+                    "form_of_education = ? WHERE id = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, newGroup.getName());
+            stmt.setLong(2, newGroup.getCoordinates().getX());
+            stmt.setLong(3, newGroup.getCoordinates().getY());
+            stmt.setLong(4, newGroup.getStudentsCount());
+            stmt.setInt(5, newGroup.getExpelledStudents());
+            stmt.setInt(6, newGroup.getTransferredStudents());
+            stmt.setObject(7, newGroup.getFormOfEducation().name(), java.sql.Types.OTHER);
+            stmt.setLong(8, id);
+
+            return stmt.executeUpdate() > 0;
+        }
+    }
+
+    // Модифицированный метод очистки
+    public void clear(String login) throws SQLException {
+        int userId = getUserIdByLogin(login);
+        String sql = "DELETE FROM study_groups WHERE user_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
+
+    // Получение группы по ID
+    public StudyGroup getById(long id) throws SQLException {
+        String sql = "SELECT * FROM study_groups WHERE id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setLong(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapResultSetToStudyGroup(rs);
+                }
+            }
+        }
+        return null;
     }
 
     private StudyGroup mapResultSetToStudyGroup(ResultSet rs) throws SQLException {

@@ -7,10 +7,29 @@ import java.util.function.Function;
 
 import Common.models.StudyGroup;
 import Common.models.User;
-import Server.services.AuthService;
+import Common.requests.AddRequest;
+import Common.requests.AuthRequest;
+import Common.requests.RemoveByIdRequest;
+import Common.requests.RemoveLowerRequest;
+import Common.requests.Request;
+import Common.requests.UpdateIdRequest;
+import Common.responses.AddResponse;
+import Common.responses.AuthResponse;
+import Common.responses.AverageOfTransferredStudentsResponse;
+import Common.responses.ClearResponse;
+import Common.responses.GroupCountingByFormOfEducationResponse;
+import Common.responses.HeadResponse;
+import Common.responses.HelpResponse;
+import Common.responses.InfoResponse;
+import Common.responses.PrintFieldAscendingGroupAdminResponse;
+import Common.responses.RemoveByIdResponse;
+import Common.responses.RemoveHeadResponse;
+import Common.responses.RemoveLowerResponse;
+import Common.responses.Response;
+import Common.responses.ShowResponse;
+import Common.responses.UpdateIdResponse;
 import Server.collectionManagers.StudyGroupCollectionManager;
-import Common.responses.*;
-import Common.requests.*;
+import Server.services.AuthService;
 
 public class ServerRequestHandler implements RequestHandler {
     private final StudyGroupCollectionManager collectionManager;
@@ -191,6 +210,9 @@ public class ServerRequestHandler implements RequestHandler {
 
     @Override
     public Response handleRequest(Request request) {
+        // Устанавливаем текущего пользователя
+        collectionManager.setCurrentUser(request.getLogin());
+        
         Function<Request, Response> handler = requestHandlers.get(request.getName());
         if (handler != null) {
             return handler.apply(request);

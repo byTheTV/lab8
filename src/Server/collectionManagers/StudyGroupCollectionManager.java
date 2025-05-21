@@ -17,6 +17,7 @@ public class StudyGroupCollectionManager {
     private final StudyGroupDAO dao;
     private final LocalDateTime creationDate;
     private final String collectionType;
+    private String currentUser;
 
     public StudyGroupCollectionManager() {
         try {
@@ -28,13 +29,20 @@ public class StudyGroupCollectionManager {
         }
     }
 
+    public void setCurrentUser(String login) {
+        this.currentUser = login;
+    }
+
     /**
      * Adds a study group to the collection
      * @param studyGroup the study group to add
      */
     public void add(StudyGroup studyGroup) {
         try {
-            dao.add(studyGroup, 1); // TODO: Pass actual user ID
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            dao.add(studyGroup, dao.getUserIdByLogin(currentUser));
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to add study group: " + e.getMessage());
             e.printStackTrace();
@@ -49,8 +57,13 @@ public class StudyGroupCollectionManager {
      */
     public boolean removeById(long id) {
         try {
-            return dao.removeById(id);
-        } catch (SQLException e) {
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            return dao.removeById(id, currentUser);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to remove study group: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to remove study group", e);
         }
     }
@@ -58,13 +71,18 @@ public class StudyGroupCollectionManager {
     /**
      * Updates a study group with the given ID
      * @param id the ID of the study group to update
-     * @param newStudyGroup the new study group data
+     * @param updatedGroup the new study group data
      * @return true if updated successfully, false if not found
      */
-    public boolean updateById(long id, StudyGroup newStudyGroup) {
+    public boolean updateById(long id, StudyGroup updatedGroup) {
         try {
-            return dao.updateById(id, newStudyGroup);
-        } catch (SQLException e) {
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            return dao.updateById(id, updatedGroup, currentUser);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to update study group: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to update study group", e);
         }
     }
@@ -74,8 +92,13 @@ public class StudyGroupCollectionManager {
      */
     public void clear() {
         try {
-            dao.clear();
-        } catch (SQLException e) {
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            dao.clear(currentUser);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to clear collection: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to clear collection", e);
         }
     }
@@ -89,6 +112,8 @@ public class StudyGroupCollectionManager {
             List<StudyGroup> groups = dao.getAll();
             return groups.isEmpty() ? null : groups.get(0);
         } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to get head element: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to get head element", e);
         }
     }
@@ -99,14 +124,17 @@ public class StudyGroupCollectionManager {
      */
     public StudyGroup removeHead() {
         try {
-            List<StudyGroup> groups = dao.getAll();
-            if (groups.isEmpty()) {
-                return null;
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
             }
-            StudyGroup head = groups.get(0);
-            dao.removeById(head.getId());
+            StudyGroup head = getHead();
+            if (head != null) {
+                removeById(head.getId());
+            }
             return head;
-        } catch (SQLException e) {
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to remove head element: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to remove head element", e);
         }
     }
@@ -121,7 +149,7 @@ public class StudyGroupCollectionManager {
             int initialSize = groups.size();
             for (StudyGroup group : groups) {
                 if (group.compareTo(studyGroup) < 0) {
-                    dao.removeById(group.getId());
+                    dao.removeById(group.getId(), currentUser);
                 }
             }
             return initialSize - dao.getAll().size();
@@ -181,8 +209,13 @@ public class StudyGroupCollectionManager {
      */
     public int getSize() {
         try {
-            return dao.getAll().size();
-        } catch (SQLException e) {
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            return dao.getUserGroups(currentUser).size();
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to get collection size: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to get collection size", e);
         }
     }
@@ -209,10 +242,12 @@ public class StudyGroupCollectionManager {
         return sb.toString();
     }
 
-    public StudyGroup getById(Long id) {
+    public StudyGroup getById(long id) {
         try {
             return dao.getById(id);
         } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to get study group by ID: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to get study group by ID", e);
         }
     }
@@ -243,6 +278,8 @@ public class StudyGroupCollectionManager {
         try {
             return dao.getAll();
         } catch (SQLException e) {
+            System.err.println("[ERROR] Failed to show collection: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("Failed to show collection", e);
         }
     }
@@ -253,6 +290,19 @@ public class StudyGroupCollectionManager {
             return StudyGroupCollectionUtils.averageOfTransferredStudents(groups);
         } catch (SQLException e) {
             throw new RuntimeException("Failed to calculate average of transferred students", e);
+        }
+    }
+
+    public List<StudyGroup> getUserGroups() {
+        try {
+            if (currentUser == null) {
+                throw new Exception("User not authenticated");
+            }
+            return dao.getUserGroups(currentUser);
+        } catch (Exception e) {
+            System.err.println("[ERROR] Failed to get user groups: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to get user groups", e);
         }
     }
 } 
