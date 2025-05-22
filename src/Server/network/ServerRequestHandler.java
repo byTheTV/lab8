@@ -54,7 +54,7 @@ public class ServerRequestHandler implements RequestHandler {
             
             String oldUid = userUids.get(login);
             if (oldUid != null) {
-               
+                System.out.println("[Сервер] Пользователь " + login + " уже подключен. Отключаем старое соединение.");
             }
 
             User user = authService.authenticateOrRegister(
@@ -66,9 +66,14 @@ public class ServerRequestHandler implements RequestHandler {
                 String uid = UUID.randomUUID().toString();
                 userUids.put(login, uid);
                 
+                String message = oldUid != null ? 
+                    "Предыдущее подключение было отключено" : 
+                    "Успешное подключение";
+                System.out.println("[Сервер] " + message + " для пользователя " + login);
+                
                 return new AuthResponse(
                         AuthResponse.AuthStatus.AUTH_SUCCESS,
-                        oldUid != null ? "Предыдущее подключение было отключено" : null,
+                        message,
                         user.getId(),
                         uid
                 );
@@ -176,14 +181,12 @@ public class ServerRequestHandler implements RequestHandler {
         requestHandlers.put("remove_lower", request -> {
             RemoveLowerRequest removeRequest = (RemoveLowerRequest) request;
             try {
-                // Находим объект по ID из коллекции
                 StudyGroup targetGroup = collectionManager.getById(removeRequest.getId());
                 
                 if (targetGroup == null) {
                     throw new IllegalArgumentException("Элемент с ID " + removeRequest.getId() + " не найден");
                 }
 
-                // Удаляем элементы, меньшие чем targetGroup
                 int count = collectionManager.removeLower(targetGroup);
                 return new RemoveLowerResponse(count, null);
             } catch (Exception e) {
@@ -225,30 +228,32 @@ public class ServerRequestHandler implements RequestHandler {
 
     @Override
     public Response handleRequest(Request request) {
-        // Check if request is not auth and verify UID
         if (!request.getName().equals("auth")) {
             String login = request.getLogin();
             String storedUid = userUids.get(login);
             
-            // If no UID found for user, they need to authenticate
             if (storedUid == null) {
+                System.out.println("[Сервер] Попытка выполнить команду без аутентификации от пользователя " + login);
                 return new Response("error", "Требуется аутентификация") {};
             }
             
-            // If UID doesn't match, the connection was invalidated by new login
             if (!storedUid.equals(request.getUid())) {
+                System.out.println("[Сервер] Попытка использовать недействительное соединение от пользователя " + login);
                 return new Response("error", "Сессия была прервана новым подключением") {};
             }
         }
         
-        // Устанавливаем текущего пользователя
         collectionManager.setCurrentUser(request.getLogin());
         
         Function<Request, Response> handler = requestHandlers.get(request.getName());
         if (handler != null) {
-            return handler.apply(request);
+            try {
+                return handler.apply(request);
+            } catch (Exception e) {
+                System.err.println("[Сервер] Ошибка при обработке запроса " + request.getName() + " от пользователя " + request.getLogin() + ": " + e.getMessage());
+                return new Response("error", "Внутренняя ошибка сервера: " + e.getMessage()) {};
+            }
         }
-        // Возвращаем базовый Response с ошибкой
-        return new Response("error", "Unknown request type: " + request.getName()) {};
+        return new Response("error", "Неизвестный тип запроса: " + request.getName()) {};
     }
 } 

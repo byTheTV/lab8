@@ -21,11 +21,9 @@ public class AuthHandler {
             String login = promptLogin();
             char[] password = promptPassword();
 
-            // Отправка логина и пароля в открытом виде
             client.sendAuthRequest(login, new String(password));
             Arrays.fill(password, ' ');
 
-            // Получение ответа от сервера
             AuthResponse response = client.receiveAuthResponse();
 
             if (response.getAuthStatus() == AuthResponse.AuthStatus.AUTH_SUCCESS) {
