@@ -1,0 +1,17 @@
+{
+  "frontendFolder": "D:/_projs/lab7/./src/main/frontend",
+  "themeFolder": "themes",
+  "themeResourceFolder": "D:/_projs/lab7/./src/main/frontend/generated/jar-resources",
+  "staticOutput": "D:/_projs/lab7/build/classes/META-INF/VAADIN/webapp/VAADIN/static",
+  "generatedFolder": "generated",
+  "statsOutput": "D:\\_projs\\lab7\\build\\classes\\META-INF\\VAADIN\\config",
+  "frontendBundleOutput": "D:\\_projs\\lab7\\build\\classes\\META-INF\\VAADIN\\webapp",
+  "devBundleOutput": "D:/_projs/lab7/build/dev-bundle/webapp",
+  "devBundleStatsOutput": "D:/_projs/lab7/build/dev-bundle/config",
+  "jarResourcesFolder": "D:/_projs/lab7/./src/main/frontend/generated/jar-resources",
+  "themeName": "",
+  "clientServiceWorkerSource": "D:\\_projs\\lab7\\build\\sw.ts",
+  "pwaEnabled": false,
+  "offlineEnabled": false,
+  "offlinePath": "'offline.html'"
+}

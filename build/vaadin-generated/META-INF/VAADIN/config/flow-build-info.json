@@ -1,0 +1,18 @@
+{
+  "productionMode": false,
+  "eagerServerLoad": false,
+  "npmFolder": "D:\\_projs\\lab7",
+  "node.version": "v20.15.0",
+  "node.download.root": "https://nodejs.org/dist/",
+  "frontendFolder": "D:\\_projs\\lab7\\.\\src\\main\\frontend",
+  "connect.javaSourceFolder": "D:\\_projs\\lab7\\src\\main\\java",
+  "javaResourceFolder": "D:\\_projs\\lab7\\src\\main\\resources",
+  "connect.applicationProperties": "D:\\_projs\\lab7\\src\\main\\resources\\application.properties",
+  "connect.openApiFile": "D:\\_projs\\lab7\\build\\generated-resources\\openapi.json",
+  "project.frontend.generated": "D:\\_projs\\lab7\\.\\src\\main\\frontend\\generated",
+  "pnpm.enable": false,
+  "bun.enable": false,
+  "require.home.node": false,
+  "build.folder": "build",
+  "react.enable": true
+}
