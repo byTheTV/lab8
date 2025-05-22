@@ -6,12 +6,13 @@ public class AuthResponse extends Response {
 
     private final AuthStatus authStatus;
     private final Integer userId;
+    private final String uid;
 
-    public AuthResponse(AuthStatus authStatus, String error, Integer userId) {
-        super("add", error);
+    public AuthResponse(AuthStatus authStatus, String error, Integer userId, String uid) {
+        super("auth", error);
         this.authStatus = authStatus;
         this.userId = userId;
-
+        this.uid = uid;
     }
 
     public Integer getUserId() {
@@ -20,5 +21,9 @@ public class AuthResponse extends Response {
 
     public AuthStatus getAuthStatus() {
         return authStatus;
+    }
+
+    public String getUid() {
+        return uid;
     }
 }

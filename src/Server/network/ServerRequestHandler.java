@@ -3,6 +3,8 @@ package Server.network;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 import Common.models.StudyGroup;
@@ -35,33 +37,46 @@ public class ServerRequestHandler implements RequestHandler {
     private final StudyGroupCollectionManager collectionManager;
     private final Map<String, Function<Request, Response>> requestHandlers;
     private final AuthService authService;
+    private final ConcurrentHashMap<String, String> userUids;
 
     public ServerRequestHandler(StudyGroupCollectionManager collectionManager, AuthService authService) {
         this.collectionManager = collectionManager;
         this.authService = authService;
         this.requestHandlers = new HashMap<>();
+        this.userUids = new ConcurrentHashMap<>();
         initializeRequestHandlers();
     }
 
     private void initializeRequestHandlers() {
-
         requestHandlers.put("auth", request -> {
             AuthRequest authRequest = (AuthRequest) request;
+            String login = authRequest.getLogin();
+            
+            String oldUid = userUids.get(login);
+            if (oldUid != null) {
+               
+            }
+
             User user = authService.authenticateOrRegister(
-                    authRequest.getLogin(),
+                    login,
                     authRequest.getPassword()
             );
 
             if (user != null) {
+                String uid = UUID.randomUUID().toString();
+                userUids.put(login, uid);
+                
                 return new AuthResponse(
                         AuthResponse.AuthStatus.AUTH_SUCCESS,
-                        null,
-                        user.getId()
+                        oldUid != null ? "Предыдущее подключение было отключено" : null,
+                        user.getId(),
+                        uid
                 );
             }
             return new AuthResponse(
                     AuthResponse.AuthStatus.AUTH_FAILED,
                     "Неверные учетные данные",
+                    null,
                     null
             );
         });
@@ -210,6 +225,22 @@ public class ServerRequestHandler implements RequestHandler {
 
     @Override
     public Response handleRequest(Request request) {
+        // Check if request is not auth and verify UID
+        if (!request.getName().equals("auth")) {
+            String login = request.getLogin();
+            String storedUid = userUids.get(login);
+            
+            // If no UID found for user, they need to authenticate
+            if (storedUid == null) {
+                return new Response("error", "Требуется аутентификация") {};
+            }
+            
+            // If UID doesn't match, the connection was invalidated by new login
+            if (!storedUid.equals(request.getUid())) {
+                return new Response("error", "Сессия была прервана новым подключением") {};
+            }
+        }
+        
         // Устанавливаем текущего пользователя
         collectionManager.setCurrentUser(request.getLogin());
         

@@ -17,6 +17,7 @@ public abstract class NetworkCommand extends Command {
 
     protected Response sendAndReceive(Request request) {
         try {
+            request.setUid(user.getUid());
             tcpClient.sendRequest(request);
             System.out.println("Отправлена команда");
             System.out.println(request.getName());

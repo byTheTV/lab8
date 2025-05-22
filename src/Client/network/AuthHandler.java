@@ -1,14 +1,11 @@
 package Client.network;
 
-import Client.network.TCPClient;
-import Common.models.User;
 import java.io.Console;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Scanner;
+
+import Common.models.User;
 import Common.responses.AuthResponse;
 
 public class AuthHandler {
@@ -35,6 +32,7 @@ public class AuthHandler {
                 User user = new User();
                 user.setLogin(login);
                 user.setId(response.getUserId());
+                user.setUid(response.getUid());
                 return user;
             } else {
                 System.err.println("Ошибка аутентификации: " + response.getError());
