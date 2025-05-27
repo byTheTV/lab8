@@ -29,6 +29,7 @@ import GUI.components.CommandsComponent;
 import GUI.components.DistributionChartComponent;
 import GUI.components.GroupDetailsComponent;
 import GUI.components.HeaderComponent;
+import GUI.components.TicTacToeComponent;
 import GUI.components.ToolbarComponent;
 
 @Route("main")
@@ -60,6 +61,7 @@ public class MainView extends VerticalLayout {
     private ToolbarComponent toolbarComponent;
     private CommandsComponent commandsComponent;
     private DistributionChartComponent distributionChartComponent;
+    private TicTacToeComponent ticTacToeComponent;
 
     public MainView(I18NProvider i18NProvider) {
         this.i18NProvider = i18NProvider;
@@ -132,6 +134,17 @@ public class MainView extends VerticalLayout {
             rightContent.setSpacing(true);
             rightContent.setPadding(false);
             rightContent.add(distributionChartComponent);
+            
+            // Add Tic Tac Toe game
+            ticTacToeComponent = new TicTacToeComponent(i18NProvider);
+            ticTacToeComponent.getStyle()
+                .set("background", "var(--lumo-base-color)")
+                .set("border-radius", "4px")
+                .set("padding", "1rem")
+                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
+                .set("margin-top", "1rem");
+            rightContent.add(ticTacToeComponent);
+            
             rightContent.getStyle()
                 .set("background", "var(--lumo-base-color)")
                 .set("border-radius", "4px")
