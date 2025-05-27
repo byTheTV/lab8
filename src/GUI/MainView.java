@@ -2,6 +2,7 @@ package GUI;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -16,6 +17,8 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.i18n.I18NProvider;
+import com.vaadin.flow.component.UI;
 
 import Client.network.TCPClient;
 import Common.models.Color;
@@ -29,17 +32,22 @@ import Common.models.FormOfEducation;
 public class MainView extends VerticalLayout {
     private final Grid<StudyGroup> grid = new Grid<>(StudyGroup.class);
     private final TextField filterText = new TextField();
-    private final Button addButton = new Button("Add Group");
-    private final Button editButton = new Button("Edit");
-    private final Button removeButton = new Button("Remove");
-    private final Button clearButton = new Button("Clear All");
+    private final Button addButton = new Button();
+    private final Button editButton = new Button();
+    private final Button removeButton = new Button();
+    private final Button clearButton = new Button();
     
     private StudyGroupService service;
     private StudyGroupDialog dialog;
     private TCPClient client;
     private String currentUserLogin;
+    private I18NProvider i18NProvider;
+    private LanguageSwitcher languageSwitcher;
 
-    public MainView() {
+    public MainView(I18NProvider i18NProvider) {
+        this.i18NProvider = i18NProvider;
+        this.languageSwitcher = new LanguageSwitcher(i18NProvider);
+        
         try {
             // Get client and credentials from session
             client = (TCPClient) VaadinSession.getCurrent().getAttribute("tcpClient");
@@ -49,7 +57,6 @@ public class MainView extends VerticalLayout {
             String userUid = (String) VaadinSession.getCurrent().getAttribute("userUid");
             
             if (client == null || login == null || password == null || userId == null || userUid == null) {
-                // Not authenticated, redirect to login
                 getUI().ifPresent(ui -> ui.navigate(""));
                 return;
             }
@@ -64,19 +71,21 @@ public class MainView extends VerticalLayout {
             configureButtons();
             configureDialog();
             
-            // Create header with user info and logout button
+            // Create header with user info, language switcher and logout button
             HorizontalLayout header = new HorizontalLayout();
             header.setWidthFull();
             header.setJustifyContentMode(JustifyContentMode.BETWEEN);
             
             // Add user info
-            H1 userInfo = new H1("Current user: " + login);
+            H1 userInfo = new H1(i18NProvider.getTranslation("main.currentUser", getCurrentLocale(), login));
             userInfo.getStyle().set("margin", "0");
             header.add(userInfo);
             
-            Button logoutButton = new Button("Logout");
+            // Add language switcher
+            header.add(languageSwitcher);
+            
+            Button logoutButton = new Button(i18NProvider.getTranslation("main.logout", getCurrentLocale()));
             logoutButton.addClickListener(e -> {
-                // Close client and clear session
                 if (service != null) {
                     service.close();
                 }
@@ -99,14 +108,14 @@ public class MainView extends VerticalLayout {
             toolbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
 
             // Add components to layout
-            add(header, new H1("Study Groups"), toolbar, grid);
+            add(header, new H1(i18NProvider.getTranslation("main.title", getCurrentLocale())), toolbar, grid);
             setAlignItems(Alignment.CENTER);
             setJustifyContentMode(JustifyContentMode.CENTER);
             
             // Load initial data
             updateList();
         } catch (Exception e) {
-            Notification.show("Error initializing view: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
+            Notification.show(i18NProvider.getTranslation("notification.error", getCurrentLocale(), e.getMessage()), 3000, Notification.Position.MIDDLE);
             getUI().ifPresent(ui -> ui.navigate(""));
         }
     }
@@ -120,72 +129,80 @@ public class MainView extends VerticalLayout {
             showGroupDetails(group);
         });
 
-        // Добавляем генератор классов для стилизации строк
+        // Add class generator for row styling
         grid.setClassNameGenerator(group -> {
             if (group.getUserId() != null && group.getUserId().equals(service.getUserId())) {
-                return "my-group"; // Класс для групп пользователя
+                return "my-group";
             } else {
-                return "other-group"; // Класс для групп других пользователей
+                return "other-group";
             }
         });
 
-        // Добавляем колонку с улучшенным индикатором (круг)
+        // Add indicator column
         grid.addColumn(new ComponentRenderer<>(group -> {
             Span indicator = new Span();
             indicator.getStyle()
                     .set("display", "inline-block")
-                    .set("width", "15px") // Увеличиваем размер круга
+                    .set("width", "15px")
                     .set("height", "15px")
-                    .set("border-radius", "50%") // Делаем круглым
-                    .set("margin-right", "10px"); // Отступ справа
+                    .set("border-radius", "50%")
+                    .set("margin-right", "10px");
 
             if (group.getUserId() != null && group.getUserId().equals(service.getUserId())) {
                 indicator.getStyle()
-                        .set("background-color", "green") // Зеленый для групп пользователя
-                        .set("border", "2px solid darkgreen"); // Граница для выделения
-                indicator.setTitle("Ваша группа"); // Подсказка
+                        .set("background-color", "green")
+                        .set("border", "2px solid darkgreen");
+                indicator.setTitle(i18NProvider.getTranslation("grid.myGroup", getCurrentLocale()));
             } else {
                 indicator.getStyle()
-                        .set("background-color", "red") // Красный для других групп
-                        .set("border", "2px solid darkred"); // Граница для выделения
-                indicator.setTitle("Чужая группа"); // Подсказка
+                        .set("background-color", "red")
+                        .set("border", "2px solid darkred");
+                indicator.setTitle(i18NProvider.getTranslation("grid.otherGroup", getCurrentLocale()));
             }
             return indicator;
-        })).setFlexGrow(0).setWidth("40px"); // Увеличиваем ширину колонки для нового размера круга
+        })).setFlexGrow(0).setWidth("40px");
 
-        // Основные колонки
+        // Configure columns with translations
         grid.setColumns("id", "name", "studentsCount", "expelledStudents", "transferredStudents", "formOfEducation");
+        grid.getColumnByKey("id").setHeader(i18NProvider.getTranslation("grid.id", getCurrentLocale()));
+        grid.getColumnByKey("name").setHeader(i18NProvider.getTranslation("grid.name", getCurrentLocale()));
+        grid.getColumnByKey("studentsCount").setHeader(i18NProvider.getTranslation("grid.studentsCount", getCurrentLocale()));
+        grid.getColumnByKey("expelledStudents").setHeader(i18NProvider.getTranslation("grid.expelledStudents", getCurrentLocale()));
+        grid.getColumnByKey("transferredStudents").setHeader(i18NProvider.getTranslation("grid.transferredStudents", getCurrentLocale()));
+        grid.getColumnByKey("formOfEducation").setHeader(i18NProvider.getTranslation("grid.formOfEducation", getCurrentLocale()));
 
-        // Пользовательские колонки для сложных объектов
+        // Custom columns
         grid.addColumn(group -> group.getCoordinates().getX() + ", " + group.getCoordinates().getY())
-                .setHeader("Координаты")
+                .setHeader(i18NProvider.getTranslation("grid.coordinates", getCurrentLocale()))
                 .setSortable(true);
 
-        grid.addColumn(group -> group.getCreationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-                .setHeader("Дата создания")
+        grid.addColumn(group -> group.getCreationDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", getCurrentLocale())))
+                .setHeader(i18NProvider.getTranslation("grid.creationDate", getCurrentLocale()))
                 .setSortable(true);
 
         grid.addColumn(group -> {
                     Person admin = group.getGroupAdmin();
-                    return admin != null ? admin.getName() : "Н/Д";
-                }).setHeader("Имя админа")
+                    return admin != null ? admin.getName() : "N/A";
+                }).setHeader(i18NProvider.getTranslation("grid.adminName", getCurrentLocale()))
                 .setSortable(true);
 
-        // Включаем сортировку для всех колонок
         grid.getColumns().forEach(col -> col.setSortable(true));
-
-        // Включаем множественный выбор
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
     }
 
     private void configureFilter() {
-        filterText.setPlaceholder("Filter by name...");
+        filterText.setPlaceholder(i18NProvider.getTranslation("main.filterPlaceholder", getCurrentLocale()));
         filterText.setClearButtonVisible(true);
         filterText.setValueChangeMode(ValueChangeMode.LAZY);
         filterText.addValueChangeListener(e -> updateList());
     }
 
     private void configureButtons() {
+        addButton.setText(i18NProvider.getTranslation("main.addGroup", getCurrentLocale()));
+        editButton.setText(i18NProvider.getTranslation("main.edit", getCurrentLocale()));
+        removeButton.setText(i18NProvider.getTranslation("main.remove", getCurrentLocale()));
+        clearButton.setText(i18NProvider.getTranslation("main.clearAll", getCurrentLocale()));
+
         addButton.addClickListener(e -> {
             StudyGroup newGroup = new StudyGroup();
             newGroup.setName("New Group");
@@ -298,35 +315,33 @@ public class MainView extends VerticalLayout {
             .set("z-index", "1000")
             .set("min-width", "300px");
 
-        // Create content
-        details.add(new H1("Group Details"));
-        details.add(new Div("ID: " + group.getId()));
-        details.add(new Div("Name: " + group.getName()));
-        details.add(new Div("Students Count: " + group.getStudentsCount()));
-        details.add(new Div("Expelled Students: " + group.getExpelledStudents()));
-        details.add(new Div("Transferred Students: " + group.getTransferredStudents()));
-        details.add(new Div("Form of Education: " + group.getFormOfEducation()));
-        details.add(new Div("Coordinates: X=" + group.getCoordinates().getX() + ", Y=" + group.getCoordinates().getY()));
-        details.add(new Div("Creation Date: " + group.getCreationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+        // Create content with translations
+        details.add(new H1(i18NProvider.getTranslation("details.title", getCurrentLocale())));
+        details.add(new Div(i18NProvider.getTranslation("details.id", getCurrentLocale()) + ": " + group.getId()));
+        details.add(new Div(i18NProvider.getTranslation("details.name", getCurrentLocale()) + ": " + group.getName()));
+        details.add(new Div(i18NProvider.getTranslation("details.studentsCount", getCurrentLocale()) + ": " + group.getStudentsCount()));
+        details.add(new Div(i18NProvider.getTranslation("details.expelledStudents", getCurrentLocale()) + ": " + group.getExpelledStudents()));
+        details.add(new Div(i18NProvider.getTranslation("details.transferredStudents", getCurrentLocale()) + ": " + group.getTransferredStudents()));
+        details.add(new Div(i18NProvider.getTranslation("details.formOfEducation", getCurrentLocale()) + ": " + group.getFormOfEducation()));
+        details.add(new Div(i18NProvider.getTranslation("details.coordinates", getCurrentLocale()) + ": X=" + group.getCoordinates().getX() + ", Y=" + group.getCoordinates().getY()));
+        details.add(new Div(i18NProvider.getTranslation("details.creationDate", getCurrentLocale()) + ": " + 
+            group.getCreationDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", getCurrentLocale()))));
         
         if (group.getGroupAdmin() != null) {
             Person admin = group.getGroupAdmin();
-            details.add(new Div("Group Admin:"));
-            details.add(new Div("  Name: " + admin.getName()));
-            details.add(new Div("  Eye Color: " + admin.getEyeColor()));
+            details.add(new Div(i18NProvider.getTranslation("details.groupAdmin", getCurrentLocale()) + ":"));
+            details.add(new Div("  " + i18NProvider.getTranslation("details.adminName", getCurrentLocale()) + ": " + admin.getName()));
+            details.add(new Div("  " + i18NProvider.getTranslation("details.eyeColor", getCurrentLocale()) + ": " + admin.getEyeColor()));
             if (admin.getLocation() != null) {
-                details.add(new Div("  Location: X=" + admin.getLocation().getX() + 
-                    ", Y=" + admin.getLocation().getY() + 
-                    ", Z=" + admin.getLocation().getZ()));
+                String locationText = String.format("%s: X=%.2f, Y=%.2f, Z=%.2f",
+                    i18NProvider.getTranslation("details.location", getCurrentLocale()),
+                    admin.getLocation().getX(),
+                    admin.getLocation().getY(),
+                    admin.getLocation().getZ());
+                details.add(new Div("  " + locationText));
             }
         }
 
-        // Add close button
-        Button closeButton = new Button("Close");
-        closeButton.addClickListener(e -> details.removeFromParent());
-        details.add(closeButton);
-
-        // Add overlay
         Div overlay = new Div();
         overlay.getStyle()
             .set("position", "fixed")
@@ -342,9 +357,20 @@ public class MainView extends VerticalLayout {
             details.removeFromParent();
         });
 
+        Button closeButton = new Button(i18NProvider.getTranslation("details.close", getCurrentLocale()));
+        closeButton.addClickListener(e -> {
+            overlay.removeFromParent();
+            details.removeFromParent();
+        });
+        details.add(closeButton);
+
         getUI().ifPresent(ui -> {
             ui.add(overlay);
             ui.add(details);
         });
+    }
+
+    private Locale getCurrentLocale() {
+        return UI.getCurrent().getLocale();
     }
 } 

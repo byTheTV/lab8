@@ -1,4 +1,6 @@
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/button/theme/lumo/vaadin-button.js';
+import 'Frontend/generated/jar-resources/buttonFunctions.js';
 import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
 import '@vaadin/dialog/theme/lumo/vaadin-dialog.js';
 import 'Frontend/generated/jar-resources/flow-component-renderer.js';
@@ -7,8 +9,6 @@ import '@vaadin/accordion/theme/lumo/vaadin-accordion.js';
 import '@vaadin/details/theme/lumo/vaadin-details.js';
 import '@vaadin/accordion/theme/lumo/vaadin-accordion-panel.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-app-layout.js';
-import '@vaadin/button/theme/lumo/vaadin-button.js';
-import 'Frontend/generated/jar-resources/buttonFunctions.js';
 import '@vaadin/app-layout/theme/lumo/vaadin-drawer-toggle.js';
 import '@vaadin/avatar/theme/lumo/vaadin-avatar.js';
 import '@vaadin/avatar-group/theme/lumo/vaadin-avatar-group.js';
