@@ -156,7 +156,13 @@ public class MainView extends VerticalLayout {
             StudyGroup selectedGroup = grid.getSelectedItems().stream().findFirst().orElse(null);
             if (selectedGroup != null) {
                 try {
-                    if (service.isGroupOwner(selectedGroup.getId().longValue())) {
+                    // Debug output
+                    System.out.println("Selected group ID: " + selectedGroup.getId());
+                    System.out.println("Selected group user ID: " + selectedGroup.getUserId());
+                    System.out.println("Current user ID: " + service.getUserId());
+                    
+                    // Direct comparison of user IDs
+                    if (selectedGroup.getUserId() != null && selectedGroup.getUserId().equals(service.getUserId())) {
                         dialog.setStudyGroup(selectedGroup);
                         dialog.open();
                     } else {
@@ -201,32 +207,18 @@ public class MainView extends VerticalLayout {
     private void configureDialog() {
         dialog.addSaveListener(event -> {
             try {
-                StudyGroup group = event.getStudyGroup();
-                if (group.getId() == null) {
-                    service.addGroup(group);
+                if (event.getStudyGroup().getId() == null) {
+                    service.addGroup(event.getStudyGroup());
                 } else {
-                    service.updateGroup(group);
+                    service.updateGroup(event.getStudyGroup());
                 }
                 updateList();
                 dialog.close();
                 Notification.show("Group saved successfully", 3000, Notification.Position.MIDDLE);
             } catch (Exception e) {
-                Notification.show("Error saving group: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
+                Notification.show("Error: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
             }
         });
-
-        dialog.addDeleteListener(event -> {
-            try {
-                StudyGroup group = event.getStudyGroup();
-                service.removeGroup(group.getId().longValue());
-                updateList();
-                dialog.close();
-                Notification.show("Group deleted successfully", 3000, Notification.Position.MIDDLE);
-            } catch (Exception e) {
-                Notification.show("Error deleting group: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
         dialog.addCloseListener(event -> dialog.close());
     }
 

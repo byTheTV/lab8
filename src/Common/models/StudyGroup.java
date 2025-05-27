@@ -24,7 +24,6 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private Integer userId; // ID пользователя, создавшего группу
 
     public StudyGroup() {
-        this.id = idCounter++;                // Автоматическая генерация уникального id
         this.creationDate = ZonedDateTime.now();
     }
 

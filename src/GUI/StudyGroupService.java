@@ -44,7 +44,6 @@ public class StudyGroupService {
 
     private void ensureConnected() throws IOException {
         if (!client.isConnected()) {
-            // Try to reconnect
             client = new TCPClient(InetAddress.getByName("localhost"), 55555);
         }
     }
@@ -62,7 +61,7 @@ public class StudyGroupService {
                 }
             } catch (Exception e) {
                 lastException = e;
-                throw e; // Don't retry for non-IO exceptions
+                throw e;
             }
         }
         throw lastException;
@@ -88,10 +87,18 @@ public class StudyGroupService {
 
     public void addGroup(StudyGroup group) throws Exception {
         executeWithRetry(() -> {
-            // Set the current user's ID for the new group
-            group.setUserId(userId);
+            // Create a new group without an ID for adding
+            StudyGroup newGroup = new StudyGroup();
+            newGroup.setName(group.getName());
+            newGroup.setCoordinates(group.getCoordinates());
+            newGroup.setStudentsCount(group.getStudentsCount());
+            newGroup.setExpelledStudents(group.getExpelledStudents());
+            newGroup.setTransferredStudents(group.getTransferredStudents());
+            newGroup.setFormOfEducation(group.getFormOfEducation());
+            newGroup.setGroupAdmin(group.getGroupAdmin());
+            newGroup.setUserId(userId); // Set the current user's ID
             
-            AddRequest request = new AddRequest(group, login, password);
+            AddRequest request = new AddRequest(newGroup, login, password);
             request.setUid(uid);
             client.sendRequest(request);
             AddResponse response = (AddResponse) client.receiveResponse();
@@ -177,10 +184,18 @@ public class StudyGroupService {
             if (response.getError() != null) {
                 throw new Exception("Server error: " + response.getError());
             }
+            
+            // Find the group and check if it belongs to the current user
             return response.getCollection().stream()
                     .filter(group -> group.getId().equals(id))
                     .findFirst()
-                    .map(group -> group.getUserId() != null && group.getUserId().equals(userId))
+                    .map(group -> {
+                        // Debug output
+                        System.out.println("Group ID: " + group.getId());
+                        System.out.println("Group User ID: " + group.getUserId());
+                        System.out.println("Current User ID: " + userId);
+                        return group.getUserId() != null && group.getUserId().equals(userId);
+                    })
                     .orElse(false);
         });
     }
@@ -189,5 +204,9 @@ public class StudyGroupService {
         if (client != null) {
             client.close();
         }
+    }
+
+    public Integer getUserId() {
+        return userId;
     }
 } 

@@ -41,7 +41,6 @@ public class StudyGroupDialog extends Dialog {
     private final IntegerField locationZ = new IntegerField("Location Z");
 
     private final Button save = new Button("Save");
-    private final Button delete = new Button("Delete");
     private final Button close = new Button("Cancel");
 
     private final Binder<StudyGroup> binder = new BeanValidationBinder<>(StudyGroup.class);
@@ -180,7 +179,6 @@ public class StudyGroupDialog extends Dialog {
         
         // Configure buttons
         save.addClickListener(event -> validateAndSave());
-        delete.addClickListener(event -> fireEvent(new DeleteEvent(this, studyGroup)));
         close.addClickListener(event -> fireEvent(new CloseEvent(this)));
 
         save.addClickShortcut(Key.ENTER);
@@ -192,10 +190,9 @@ public class StudyGroupDialog extends Dialog {
 
     private HorizontalLayout createButtonsLayout() {
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
         close.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
 
-        return new HorizontalLayout(save, delete, close);
+        return new HorizontalLayout(save, close);
     }
 
     public void setStudyGroup(StudyGroup studyGroup) {
@@ -206,6 +203,7 @@ public class StudyGroupDialog extends Dialog {
     private void validateAndSave() {
         try {
             binder.writeBean(studyGroup);
+            // Don't set a temporary ID - let the server assign it
             fireEvent(new SaveEvent(this, studyGroup));
         } catch (Exception e) {
             Notification.show("Error: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
@@ -232,12 +230,6 @@ public class StudyGroupDialog extends Dialog {
         }
     }
 
-    public static class DeleteEvent extends StudyGroupDialogEvent {
-        DeleteEvent(StudyGroupDialog source, StudyGroup studyGroup) {
-            super(source, studyGroup);
-        }
-    }
-
     public static class CloseEvent extends StudyGroupDialogEvent {
         CloseEvent(StudyGroupDialog source) {
             super(source, null);
@@ -246,10 +238,6 @@ public class StudyGroupDialog extends Dialog {
 
     public Registration addSaveListener(ComponentEventListener<SaveEvent> listener) {
         return addListener(SaveEvent.class, listener);
-    }
-
-    public Registration addDeleteListener(ComponentEventListener<DeleteEvent> listener) {
-        return addListener(DeleteEvent.class, listener);
     }
 
     public Registration addCloseListener(ComponentEventListener<CloseEvent> listener) {

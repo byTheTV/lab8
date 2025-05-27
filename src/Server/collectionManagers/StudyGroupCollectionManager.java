@@ -42,7 +42,8 @@ public class StudyGroupCollectionManager {
             if (currentUser == null) {
                 throw new Exception("User not authenticated");
             }
-            dao.add(studyGroup, dao.getUserIdByLogin(currentUser));
+            int userId = dao.getUserIdByLogin(currentUser);
+            dao.add(studyGroup, userId);
         } catch (Exception e) {
             System.err.println("[ERROR] Failed to add study group: " + e.getMessage());
             e.printStackTrace();

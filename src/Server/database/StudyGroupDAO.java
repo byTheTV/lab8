@@ -43,17 +43,6 @@ public class StudyGroupDAO {
     }
 
     public void add(StudyGroup group, int userId) throws SQLException {
-        // First ensure the user exists
-        String checkUserSql = "SELECT id FROM users WHERE id = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(checkUserSql)) {
-            stmt.setInt(1, userId);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (!rs.next()) {
-                    throw new SQLException("User with ID " + userId + " does not exist");
-                }
-            }
-        }
-
         String sql = "INSERT INTO study_groups (name, coordinates_x, coordinates_y, creation_date, " +
                     "students_count, expelled_students, transferred_students, form_of_education, " +
                     "group_admin_id, user_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -295,6 +284,9 @@ public class StudyGroupDAO {
             group.setExpelledStudents(rs.getInt("expelled_students"));
             group.setTransferredStudents(rs.getInt("transferred_students"));
             group.setFormOfEducation(FormOfEducation.valueOf(rs.getString("form_of_education")));
+            
+            // Set user ID
+            group.setUserId(rs.getInt("user_id"));
             
             // Load group admin
             int adminId = rs.getInt("group_admin_id");
