@@ -15,7 +15,29 @@ public class AuthHandler {
         this.client = client;
     }
 
-    // Убрано хеширование пароля на клиенте
+    // New method for GUI authentication
+    public User authenticate(String login, String password) {
+        try {
+            client.sendAuthRequest(login, password);
+            AuthResponse response = client.receiveAuthResponse();
+
+            if (response.getAuthStatus() == AuthResponse.AuthStatus.AUTH_SUCCESS) {
+                User user = new User();
+                user.setLogin(login);
+                user.setId(response.getUserId());
+                user.setUid(response.getUid());
+                return user;
+            } else {
+                System.err.println("Ошибка аутентификации: " + response.getError());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Ошибка при аутентификации: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    // Original console-based authentication
     public User authenticate() {
         try {
             String login = promptLogin();
@@ -35,13 +57,12 @@ public class AuthHandler {
             } else {
                 System.err.println("Ошибка аутентификации: " + response.getError());
             }
-        } catch (IOException | ClassNotFoundException e) { // Добавлено ClassNotFoundException
+        } catch (IOException | ClassNotFoundException e) {
             System.err.println("Ошибка при аутентификации: " + e.getMessage());
         }
 
         return null;
     }
-
 
     private String promptLogin() {
         Scanner scanner = new Scanner(System.in);
@@ -58,5 +79,4 @@ public class AuthHandler {
             return new Scanner(System.in).nextLine().toCharArray();
         }
     }
-
 }
