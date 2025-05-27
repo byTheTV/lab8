@@ -15,6 +15,9 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 
 import Client.network.TCPClient;
+import Common.models.Color;
+import Common.models.Coordinates;
+import Common.models.Location;
 import Common.models.Person;
 import Common.models.StudyGroup;
 
@@ -132,7 +135,20 @@ public class MainView extends VerticalLayout {
 
     private void configureButtons() {
         addButton.addClickListener(e -> {
-            dialog.setStudyGroup(new StudyGroup());
+            StudyGroup newGroup = new StudyGroup();
+            newGroup.setName("New Group");
+            newGroup.setCoordinates(new Coordinates(0L, 0L));
+            newGroup.setStudentsCount(1);
+            newGroup.setExpelledStudents(1);
+            newGroup.setTransferredStudents(1);
+            
+            Person admin = new Person();
+            admin.setName("Admin");
+            admin.setEyeColor(Common.models.Color.GREEN);
+            admin.setLocation(new Location(0f, 0f, 0f));
+            
+            newGroup.setGroupAdmin(admin);
+            dialog.setStudyGroup(newGroup);
             dialog.open();
         });
 
