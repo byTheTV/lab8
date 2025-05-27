@@ -21,6 +21,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private int transferredStudents; // Значение > 0
     private FormOfEducation formOfEducation; // Может быть null
     private Person groupAdmin; // Поле не может быть null
+    private Integer userId; // ID пользователя, создавшего группу
 
     public StudyGroup() {
         this.id = idCounter++;                // Автоматическая генерация уникального id
@@ -89,6 +90,10 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         this.id = id;
     }
 
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
     // Геттеры
     public Integer getId() { return id; }
     public String getName() { return name; }
@@ -99,6 +104,9 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     public int getTransferredStudents() { return transferredStudents; }
     public FormOfEducation getFormOfEducation() { return formOfEducation; }
     public Person getGroupAdmin() { return groupAdmin; }
+    public Integer getUserId() {
+        return userId;
+    }
 
     @Override
     public int compareTo(StudyGroup other) {

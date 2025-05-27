@@ -49,7 +49,7 @@ public class MainView extends VerticalLayout {
                 return;
             }
             
-            this.service = new StudyGroupService(client, login, password, userUid);
+            this.service = new StudyGroupService(client, login, password, userUid, userId);
             this.dialog = new StudyGroupDialog();
             
             setSizeFull();
@@ -155,8 +155,16 @@ public class MainView extends VerticalLayout {
         editButton.addClickListener(e -> {
             StudyGroup selectedGroup = grid.getSelectedItems().stream().findFirst().orElse(null);
             if (selectedGroup != null) {
-                dialog.setStudyGroup(selectedGroup);
-                dialog.open();
+                try {
+                    if (service.isGroupOwner(selectedGroup.getId().longValue())) {
+                        dialog.setStudyGroup(selectedGroup);
+                        dialog.open();
+                    } else {
+                        Notification.show("You can only edit groups that you created", 3000, Notification.Position.MIDDLE);
+                    }
+                } catch (Exception ex) {
+                    Notification.show("Error checking group ownership: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+                }
             } else {
                 Notification.show("Please select a group to edit", 3000, Notification.Position.MIDDLE);
             }

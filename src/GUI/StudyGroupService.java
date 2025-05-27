@@ -22,14 +22,16 @@ public class StudyGroupService {
     private final String login;
     private final String password;
     private String uid;
+    private final Integer userId;
     private static final int MAX_RETRIES = 3;
     private static final long RETRY_DELAY_MS = 1000;
 
-    public StudyGroupService(TCPClient client, String login, String password, String uid) {
+    public StudyGroupService(TCPClient client, String login, String password, String uid, Integer userId) {
         this.client = client;
         this.login = login;
         this.password = password;
         this.uid = uid;
+        this.userId = userId;
     }
 
     private void sleep(long millis) {
@@ -86,6 +88,9 @@ public class StudyGroupService {
 
     public void addGroup(StudyGroup group) throws Exception {
         executeWithRetry(() -> {
+            // Set the current user's ID for the new group
+            group.setUserId(userId);
+            
             AddRequest request = new AddRequest(group, login, password);
             request.setUid(uid);
             client.sendRequest(request);
@@ -99,6 +104,22 @@ public class StudyGroupService {
 
     public void updateGroup(StudyGroup group) throws Exception {
         executeWithRetry(() -> {
+            // First get the current group to preserve its user ID
+            ShowRequest showRequest = new ShowRequest(login, password);
+            showRequest.setUid(uid);
+            client.sendRequest(showRequest);
+            ShowResponse showResponse = (ShowResponse) client.receiveResponse();
+            if (showResponse.getError() != null) {
+                throw new Exception("Server error: " + showResponse.getError());
+            }
+            
+            // Find the original group and preserve its user ID
+            showResponse.getCollection().stream()
+                .filter(g -> g.getId().equals(group.getId()))
+                .findFirst()
+                .ifPresent(originalGroup -> group.setUserId(originalGroup.getUserId()));
+            
+            // Now send the update request
             UpdateIdRequest request = new UpdateIdRequest(group.getId().longValue(), group, login, password);
             request.setUid(uid);
             client.sendRequest(request);
@@ -145,6 +166,23 @@ public class StudyGroupService {
         return allGroups.stream()
                 .filter(group -> group.getName().toLowerCase().contains(lowerCaseFilter))
                 .collect(Collectors.toList());
+    }
+
+    public boolean isGroupOwner(Long id) throws Exception {
+        return executeWithRetry(() -> {
+            ShowRequest request = new ShowRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            ShowResponse response = (ShowResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.getCollection().stream()
+                    .filter(group -> group.getId().equals(id))
+                    .findFirst()
+                    .map(group -> group.getUserId() != null && group.getUserId().equals(userId))
+                    .orElse(false);
+        });
     }
 
     public void close() {
