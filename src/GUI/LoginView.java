@@ -49,10 +49,14 @@ public class LoginView extends VerticalLayout {
                     VaadinSession.getCurrent().setAttribute("tcpClient", client);
                     VaadinSession.getCurrent().setAttribute("login", username.getValue());
                     VaadinSession.getCurrent().setAttribute("password", password.getValue());
+                    VaadinSession.getCurrent().setAttribute("userId", user.getId());
+                    VaadinSession.getCurrent().setAttribute("userUid", user.getUid());
                     
                     // Successful login
                     getUI().ifPresent(ui -> ui.navigate("main"));
                 } else {
+                    // Close client if authentication failed
+                    client.close();
                     Notification.show("Invalid username or password", 3000, Notification.Position.MIDDLE);
                 }
             } catch (Exception ex) {

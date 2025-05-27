@@ -1,7 +1,5 @@
 package GUI;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -16,9 +14,9 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 
+import Client.network.TCPClient;
 import Common.models.Person;
 import Common.models.StudyGroup;
-import Client.network.TCPClient;
 
 @Route("main")
 public class MainView extends VerticalLayout {
@@ -31,21 +29,24 @@ public class MainView extends VerticalLayout {
     
     private StudyGroupService service;
     private StudyGroupDialog dialog;
+    private TCPClient client;
 
     public MainView() {
         try {
             // Get client and credentials from session
-            TCPClient client = (TCPClient) VaadinSession.getCurrent().getAttribute("tcpClient");
+            client = (TCPClient) VaadinSession.getCurrent().getAttribute("tcpClient");
             String login = (String) VaadinSession.getCurrent().getAttribute("login");
             String password = (String) VaadinSession.getCurrent().getAttribute("password");
+            Integer userId = (Integer) VaadinSession.getCurrent().getAttribute("userId");
+            String userUid = (String) VaadinSession.getCurrent().getAttribute("userUid");
             
-            if (client == null || login == null || password == null) {
+            if (client == null || login == null || password == null || userId == null || userUid == null) {
                 // Not authenticated, redirect to login
                 getUI().ifPresent(ui -> ui.navigate(""));
                 return;
             }
             
-            this.service = new StudyGroupService(client, login, password);
+            this.service = new StudyGroupService(client, login, password, userUid);
             this.dialog = new StudyGroupDialog();
             
             setSizeFull();
@@ -61,10 +62,18 @@ public class MainView extends VerticalLayout {
             
             Button logoutButton = new Button("Logout");
             logoutButton.addClickListener(e -> {
-                // Clear session and redirect to login
+                // Close client and clear session
+                if (service != null) {
+                    service.close();
+                }
+                if (client != null) {
+                    client.close();
+                }
                 VaadinSession.getCurrent().setAttribute("tcpClient", null);
                 VaadinSession.getCurrent().setAttribute("login", null);
                 VaadinSession.getCurrent().setAttribute("password", null);
+                VaadinSession.getCurrent().setAttribute("userId", null);
+                VaadinSession.getCurrent().setAttribute("userUid", null);
                 getUI().ifPresent(ui -> ui.navigate(""));
             });
             
