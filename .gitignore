@@ -28,6 +28,7 @@ bin/
 ### Mac OS ###
 .DS_Store
 
+src/main/frontend/
 node_modules
 .gradle
 .idea
