@@ -51,6 +51,7 @@ public class StudyGroupDialog extends Dialog {
         
         // Configure form fields
         formOfEducation.setItems(FormOfEducation.values());
+        formOfEducation.setValue(FormOfEducation.FULL_TIME_EDUCATION); // Set default value
         eyeColor.setItems(Color.values());
         
         // Configure numeric fields
@@ -125,14 +126,14 @@ public class StudyGroupDialog extends Dialog {
                   });
                   
         binder.forField(passportId)
-            .withValidator(id -> id == null || (!id.trim().isEmpty() && id.length() <= 26), 
-                          "Passport ID must be either null or a non-empty string with length <= 26")
+            .withValidator(id -> id == null || id.trim().isEmpty() || id.length() <= 26, 
+                          "Passport ID must be either empty or a string with length <= 26")
             .bind(group -> group.getGroupAdmin() != null ? group.getGroupAdmin().getPassportID() : null,
                   (group, id) -> {
                       if (group.getGroupAdmin() == null) {
                           group.setGroupAdmin(new Person());
                       }
-                      group.getGroupAdmin().setPassportID(id);
+                      group.getGroupAdmin().setPassportID(id != null && !id.trim().isEmpty() ? id : null);
                   });
                   
         binder.forField(locationX)

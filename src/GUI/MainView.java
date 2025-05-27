@@ -20,6 +20,7 @@ import Common.models.Coordinates;
 import Common.models.Location;
 import Common.models.Person;
 import Common.models.StudyGroup;
+import Common.models.FormOfEducation;
 
 @Route("main")
 public class MainView extends VerticalLayout {
@@ -141,6 +142,7 @@ public class MainView extends VerticalLayout {
             newGroup.setStudentsCount(1);
             newGroup.setExpelledStudents(1);
             newGroup.setTransferredStudents(1);
+            newGroup.setFormOfEducation(FormOfEducation.FULL_TIME_EDUCATION);
             
             Person admin = new Person();
             admin.setName("Admin");

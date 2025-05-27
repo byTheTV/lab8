@@ -191,9 +191,9 @@ public class StudyGroupService {
                     .findFirst()
                     .map(group -> {
                         // Debug output
-                        System.out.println("Group ID: " + group.getId());
-                        System.out.println("Group User ID: " + group.getUserId());
-                        System.out.println("Current User ID: " + userId);
+      //                  System.out.println("Group ID: " + group.getId());
+      //                  System.out.println("Group User ID: " + group.getUserId());
+      //                  System.out.println("Current User ID: " + userId);
                         return group.getUserId() != null && group.getUserId().equals(userId);
                     })
                     .orElse(false);
