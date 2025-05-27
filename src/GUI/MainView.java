@@ -3,14 +3,11 @@ package GUI;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -28,6 +25,11 @@ import Common.models.FormOfEducation;
 import Common.models.Location;
 import Common.models.Person;
 import Common.models.StudyGroup;
+import GUI.components.CommandsComponent;
+import GUI.components.DistributionChartComponent;
+import GUI.components.GroupDetailsComponent;
+import GUI.components.HeaderComponent;
+import GUI.components.ToolbarComponent;
 
 @Route("main")
 public class MainView extends VerticalLayout {
@@ -53,6 +55,12 @@ public class MainView extends VerticalLayout {
     private I18NProvider i18NProvider;
     private LanguageSwitcher languageSwitcher;
 
+    // Components
+    private HeaderComponent headerComponent;
+    private ToolbarComponent toolbarComponent;
+    private CommandsComponent commandsComponent;
+    private DistributionChartComponent distributionChartComponent;
+
     public MainView(I18NProvider i18NProvider) {
         this.i18NProvider = i18NProvider;
         this.languageSwitcher = new LanguageSwitcher(i18NProvider);
@@ -74,127 +82,33 @@ public class MainView extends VerticalLayout {
             this.service = new StudyGroupService(client, login, password, userUid, userId);
             this.dialog = new StudyGroupDialog();
             
+            // Add dialog event listeners
+            dialog.addSaveListener(event -> {
+                try {
+                    StudyGroup savedGroup = event.getStudyGroup();
+                    if (savedGroup.getId() == null) {
+                        // New group
+                        service.addGroup(savedGroup);
+                    } else {
+                        // Existing group
+                        service.updateGroup(savedGroup);
+                    }
+                    updateList();
+                    dialog.close();
+                } catch (Exception ex) {
+                    Notification.show("Error saving group: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+                }
+            });
+
+            dialog.addCloseListener(event -> dialog.close());
+            
             setSizeFull();
             setPadding(false);
             setSpacing(false);
             configureGrid();
-            configureFilter();
-            configureButtons();
-            configureDialog();
+            configureComponents();
+            configureLogoutButton();
             
-            // Create header with user info, language switcher and logout button
-            HorizontalLayout header = new HorizontalLayout();
-            header.setWidthFull();
-            header.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            header.setAlignItems(Alignment.CENTER);
-            header.getStyle()
-                .set("background", "var(--lumo-base-color)")
-                .set("padding", "1rem")
-                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)")
-                .set("position", "sticky")
-                .set("top", "0")
-                .set("z-index", "100");
-            
-            // Add user info
-            H1 userInfo = new H1(i18NProvider.getTranslation("main.currentUser", getCurrentLocale(), login));
-            userInfo.getStyle()
-                .set("margin", "0")
-                .set("font-size", "1.2rem");
-            header.add(userInfo);
-            
-            // Add language switcher and logout button in a group
-            logoutButton.setText(i18NProvider.getTranslation("main.logout", getCurrentLocale()));
-            logoutButton.addClickListener(e -> {
-                if (service != null) {
-                    service.close();
-                }
-                if (client != null) {
-                    client.close();
-                }
-                VaadinSession.getCurrent().setAttribute("tcpClient", null);
-                VaadinSession.getCurrent().setAttribute("login", null);
-                VaadinSession.getCurrent().setAttribute("password", null);
-                VaadinSession.getCurrent().setAttribute("userId", null);
-                VaadinSession.getCurrent().setAttribute("userUid", null);
-                getUI().ifPresent(ui -> ui.navigate(""));
-            });
-            
-            HorizontalLayout rightControls = new HorizontalLayout(languageSwitcher, logoutButton);
-            rightControls.setSpacing(true);
-            header.add(rightControls);
-
-            // Create main toolbar with filter and operations
-            HorizontalLayout mainToolbar = new HorizontalLayout();
-            mainToolbar.setWidthFull();
-            mainToolbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            mainToolbar.setAlignItems(Alignment.CENTER);
-            mainToolbar.getStyle()
-                .set("background", "var(--lumo-base-color)")
-                .set("border-radius", "4px")
-                .set("padding", "0.5rem")
-                .set("margin", "1rem")
-                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-            
-            // Left side - filter
-            filterText.getStyle()
-                .set("min-width", "300px")
-                .set("margin-right", "1rem");
-            mainToolbar.add(filterText);
-            
-            // Right side - operations
-            HorizontalLayout operations = new HorizontalLayout(addButton, editButton, removeButton, clearButton);
-            operations.setSpacing(true);
-            mainToolbar.add(operations);
-
-            // Create command buttons in a card-like container
-            Div commandCard = new Div();
-            commandCard.getStyle()
-                .set("background", "var(--lumo-base-color)")
-                .set("border-radius", "4px")
-                .set("padding", "1rem")
-                .set("margin", "0 1rem 1rem 1rem")
-                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-
-            // Group commands by functionality
-            HorizontalLayout commandGroups = new HorizontalLayout();
-            commandGroups.setWidthFull();
-            commandGroups.setSpacing(true);
-            commandGroups.setJustifyContentMode(JustifyContentMode.BETWEEN);
-            commandGroups.getStyle().set("flex-wrap", "wrap"); // Allow wrapping
-
-            // Collection info commands
-            VerticalLayout infoCommands = new VerticalLayout();
-            infoCommands.setSpacing(true);
-            infoCommands.setPadding(false);
-            infoCommands.add(new Span(i18NProvider.getTranslation("commands.collectionInfo", getCurrentLocale())));
-            HorizontalLayout infoButtons = new HorizontalLayout(infoButton, headButton, removeHeadButton);
-            infoButtons.setSpacing(true);
-            infoCommands.add(infoButtons);
-            infoCommands.getStyle()
-                 .set("flex-grow", "1");
-
-            // Make buttons within infoCommands fill available width
-            infoButtons.setFlexGrow(1, infoButton, headButton, removeHeadButton);
-            infoButtons.getStyle().set("width", "500px");
-
-            // Statistics commands
-            VerticalLayout statsCommands = new VerticalLayout();
-            statsCommands.setSpacing(true);
-            statsCommands.setPadding(false);
-            statsCommands.add(new Span(i18NProvider.getTranslation("commands.statistics", getCurrentLocale())));
-            HorizontalLayout statsButtons = new HorizontalLayout(averageTransferredButton, countByFormButton, printAdminAscButton);
-            statsButtons.setSpacing(true);
-            statsCommands.add(statsButtons);
-            statsCommands.getStyle()
-                 .set("flex-grow", "1");
-
-            // Make buttons within statsCommands fill available width
-            statsButtons.setFlexGrow(1, averageTransferredButton, countByFormButton, printAdminAscButton);
-            statsButtons.getStyle().set("width", "500px");
-
-            commandGroups.add(infoCommands, statsCommands);
-            commandCard.add(commandGroups);
-
             // Create main content layout
             HorizontalLayout mainContent = new HorizontalLayout();
             mainContent.setWidthFull();
@@ -208,7 +122,7 @@ public class MainView extends VerticalLayout {
             leftContent.setHeightFull();
             leftContent.setSpacing(true);
             leftContent.setPadding(false);
-            leftContent.add(mainToolbar, commandCard, grid);
+            leftContent.add(toolbarComponent, commandsComponent, grid);
             leftContent.setFlexGrow(1, grid);
 
             // Create right side content with chart
@@ -217,7 +131,7 @@ public class MainView extends VerticalLayout {
             rightContent.setHeightFull();
             rightContent.setSpacing(true);
             rightContent.setPadding(false);
-            rightContent.add(distributionChart);
+            rightContent.add(distributionChartComponent);
             rightContent.getStyle()
                 .set("background", "var(--lumo-base-color)")
                 .set("border-radius", "4px")
@@ -228,7 +142,7 @@ public class MainView extends VerticalLayout {
             mainContent.add(leftContent, rightContent);
 
             // Add components to layout
-            add(header);
+            add(headerComponent);
             add(mainContent);
             
             setAlignItems(Alignment.STRETCH);
@@ -243,6 +157,165 @@ public class MainView extends VerticalLayout {
             Notification.show(i18NProvider.getTranslation("notification.error", getCurrentLocale(), e.getMessage()), 3000, Notification.Position.MIDDLE);
             getUI().ifPresent(ui -> ui.navigate(""));
         }
+    }
+
+    private void configureComponents() {
+        // Initialize components
+        headerComponent = new HeaderComponent(i18NProvider, currentUserLogin);
+        toolbarComponent = new ToolbarComponent(i18NProvider);
+        commandsComponent = new CommandsComponent(i18NProvider);
+        distributionChartComponent = new DistributionChartComponent(i18NProvider);
+
+        // Configure toolbar buttons
+        toolbarComponent.getAddButton().addClickListener(e -> {
+            StudyGroup newGroup = new StudyGroup();
+            newGroup.setName("New Group");
+            newGroup.setCoordinates(new Coordinates(0L, 0L));
+            newGroup.setStudentsCount(1);
+            newGroup.setExpelledStudents(1);
+            newGroup.setTransferredStudents(1);
+            newGroup.setFormOfEducation(FormOfEducation.FULL_TIME_EDUCATION);
+            
+            Person admin = new Person();
+            admin.setName("Admin");
+            admin.setEyeColor(Common.models.Color.GREEN);
+            admin.setLocation(new Location(0f, 0f, 0f));
+            
+            newGroup.setGroupAdmin(admin);
+            dialog.setStudyGroup(newGroup);
+            dialog.open();
+        });
+
+        toolbarComponent.getEditButton().addClickListener(e -> {
+            StudyGroup selectedGroup = grid.getSelectedItems().stream().findFirst().orElse(null);
+            if (selectedGroup != null) {
+                try {
+                    if (selectedGroup.getUserId() != null && selectedGroup.getUserId().equals(service.getUserId())) {
+                        dialog.setStudyGroup(selectedGroup);
+                        dialog.open();
+                    } else {
+                        Notification.show("You can only edit groups that you created", 3000, Notification.Position.MIDDLE);
+                    }
+                } catch (Exception ex) {
+                    Notification.show("Error checking group ownership: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+                }
+            } else {
+                Notification.show("Please select a group to edit", 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        toolbarComponent.getRemoveButton().addClickListener(e -> {
+            List<StudyGroup> selectedGroups = grid.getSelectedItems().stream().toList();
+            if (!selectedGroups.isEmpty()) {
+                try {
+                    for (StudyGroup group : selectedGroups) {
+                        service.removeGroup(group.getId().longValue());
+                    }
+                    updateList();
+                    Notification.show("Groups removed successfully", 3000, Notification.Position.MIDDLE);
+                } catch (Exception ex) {
+                    Notification.show("Error removing groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+                }
+            } else {
+                Notification.show("Please select groups to remove", 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        toolbarComponent.getClearButton().addClickListener(e -> {
+            try {
+                service.clearGroups();
+                updateList();
+                Notification.show("All groups cleared successfully", 3000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error clearing groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        // Configure filter
+        toolbarComponent.getFilterText().setValueChangeMode(ValueChangeMode.LAZY);
+        toolbarComponent.getFilterText().addValueChangeListener(e -> updateList());
+
+        // Configure command buttons
+        commandsComponent.getInfoButton().addClickListener(e -> {
+            try {
+                String info = service.getInfo();
+                Notification.show(info, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error getting info: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        commandsComponent.getHeadButton().addClickListener(e -> {
+            try {
+                StudyGroup head = service.getHead();
+                if (head != null) {
+                    showGroupDetails(head);
+                } else {
+                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
+                }
+            } catch (Exception ex) {
+                Notification.show("Error getting head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        commandsComponent.getRemoveHeadButton().addClickListener(e -> {
+            try {
+                StudyGroup removed = service.removeHead();
+                if (removed != null) {
+                    Notification.show("Removed head element: " + removed.getName(), 3000, Notification.Position.MIDDLE);
+                    updateList();
+                } else {
+                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
+                }
+            } catch (Exception ex) {
+                Notification.show("Error removing head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        commandsComponent.getAverageTransferredButton().addClickListener(e -> {
+            try {
+                double average = service.getAverageOfTransferredStudents();
+                Notification.show("Average of transferred students: " + average, 3000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error calculating average: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        commandsComponent.getCountByFormButton().addClickListener(e -> {
+            try {
+                String counts = service.getGroupCountingByFormOfEducation();
+                Notification.show(counts, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error counting groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        commandsComponent.getPrintAdminAscButton().addClickListener(e -> {
+            try {
+                String admins = service.getPrintFieldAscendingGroupAdmin();
+                Notification.show(admins, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error getting admin list: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+    }
+
+    private void configureLogoutButton() {
+        logoutButton.setText(i18NProvider.getTranslation("main.logout", getCurrentLocale()));
+        logoutButton.addClickListener(e -> {
+            if (service != null) {
+                service.close();
+            }
+            if (client != null) {
+                client.close();
+            }
+            VaadinSession.getCurrent().setAttribute("tcpClient", null);
+            VaadinSession.getCurrent().setAttribute("login", null);
+            VaadinSession.getCurrent().setAttribute("password", null);
+            VaadinSession.getCurrent().setAttribute("userId", null);
+            VaadinSession.getCurrent().setAttribute("userUid", null);
+            getUI().ifPresent(ui -> ui.navigate(""));
+        });
     }
 
     private void configureGrid() {
@@ -317,342 +390,17 @@ public class MainView extends VerticalLayout {
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
     }
 
-    private void configureFilter() {
-        filterText.setPlaceholder(i18NProvider.getTranslation("main.filterPlaceholder", getCurrentLocale()));
-        filterText.setClearButtonVisible(true);
-        filterText.setValueChangeMode(ValueChangeMode.LAZY);
-        filterText.addValueChangeListener(e -> updateList());
-    }
-
-    private void configureButtons() {
-        addButton.setText(i18NProvider.getTranslation("main.addGroup", getCurrentLocale()));
-        editButton.setText(i18NProvider.getTranslation("main.edit", getCurrentLocale()));
-        removeButton.setText(i18NProvider.getTranslation("main.remove", getCurrentLocale()));
-        clearButton.setText(i18NProvider.getTranslation("main.clearAll", getCurrentLocale()));
-        infoButton.setText(i18NProvider.getTranslation("main.info", getCurrentLocale()));
-        headButton.setText(i18NProvider.getTranslation("main.head", getCurrentLocale()));
-        removeHeadButton.setText(i18NProvider.getTranslation("main.removeHead", getCurrentLocale()));
-        averageTransferredButton.setText(i18NProvider.getTranslation("main.averageTransferred", getCurrentLocale()));
-        countByFormButton.setText(i18NProvider.getTranslation("main.countByForm", getCurrentLocale()));
-        printAdminAscButton.setText(i18NProvider.getTranslation("main.printAdminAsc", getCurrentLocale()));
-
-        addButton.addClickListener(e -> {
-            StudyGroup newGroup = new StudyGroup();
-            newGroup.setName("New Group");
-            newGroup.setCoordinates(new Coordinates(0L, 0L));
-            newGroup.setStudentsCount(1);
-            newGroup.setExpelledStudents(1);
-            newGroup.setTransferredStudents(1);
-            newGroup.setFormOfEducation(FormOfEducation.FULL_TIME_EDUCATION);
-            
-            Person admin = new Person();
-            admin.setName("Admin");
-            admin.setEyeColor(Common.models.Color.GREEN);
-            admin.setLocation(new Location(0f, 0f, 0f));
-            
-            newGroup.setGroupAdmin(admin);
-            dialog.setStudyGroup(newGroup);
-            dialog.open();
-        });
-
-        editButton.addClickListener(e -> {
-            StudyGroup selectedGroup = grid.getSelectedItems().stream().findFirst().orElse(null);
-            if (selectedGroup != null) {
-                try {
-                    // Debug output
-                    System.out.println("Selected group ID: " + selectedGroup.getId());
-                    System.out.println("Selected group user ID: " + selectedGroup.getUserId());
-                    System.out.println("Current user ID: " + service.getUserId());
-                    
-                    // Direct comparison of user IDs
-                    if (selectedGroup.getUserId() != null && selectedGroup.getUserId().equals(service.getUserId())) {
-                        dialog.setStudyGroup(selectedGroup);
-                        dialog.open();
-                    } else {
-                        Notification.show("You can only edit groups that you created", 3000, Notification.Position.MIDDLE);
-                    }
-                } catch (Exception ex) {
-                    Notification.show("Error checking group ownership: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-                }
-            } else {
-                Notification.show("Please select a group to edit", 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        removeButton.addClickListener(e -> {
-            List<StudyGroup> selectedGroups = grid.getSelectedItems().stream().toList();
-            if (!selectedGroups.isEmpty()) {
-                try {
-                    for (StudyGroup group : selectedGroups) {
-                        service.removeGroup(group.getId().longValue());
-                    }
-                    updateList();
-                    Notification.show("Groups removed successfully", 3000, Notification.Position.MIDDLE);
-                } catch (Exception ex) {
-                    Notification.show("Error removing groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-                }
-            } else {
-                Notification.show("Please select groups to remove", 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        clearButton.addClickListener(e -> {
-            try {
-                service.clearGroups();
-                updateList();
-                Notification.show("All groups cleared successfully", 3000, Notification.Position.MIDDLE);
-            } catch (Exception ex) {
-                Notification.show("Error clearing groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        // New command button handlers
-        infoButton.addClickListener(e -> {
-            try {
-                String info = service.getInfo();
-                Notification.show(info, 5000, Notification.Position.MIDDLE);
-            } catch (Exception ex) {
-                Notification.show("Error getting info: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        headButton.addClickListener(e -> {
-            try {
-                StudyGroup head = service.getHead();
-                if (head != null) {
-                    showGroupDetails(head);
-                } else {
-                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
-                }
-            } catch (Exception ex) {
-                Notification.show("Error getting head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        removeHeadButton.addClickListener(e -> {
-            try {
-                StudyGroup removed = service.removeHead();
-                if (removed != null) {
-                    Notification.show("Removed head element: " + removed.getName(), 3000, Notification.Position.MIDDLE);
-                    updateList();
-                } else {
-                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
-                }
-            } catch (Exception ex) {
-                Notification.show("Error removing head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        averageTransferredButton.addClickListener(e -> {
-            try {
-                double average = service.getAverageOfTransferredStudents();
-                Notification.show("Average of transferred students: " + average, 3000, Notification.Position.MIDDLE);
-            } catch (Exception ex) {
-                Notification.show("Error calculating average: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        countByFormButton.addClickListener(e -> {
-            try {
-                String counts = service.getGroupCountingByFormOfEducation();
-                Notification.show(counts, 5000, Notification.Position.MIDDLE);
-            } catch (Exception ex) {
-                Notification.show("Error counting groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-
-        printAdminAscButton.addClickListener(e -> {
-            try {
-                String admins = service.getPrintFieldAscendingGroupAdmin();
-                Notification.show(admins, 5000, Notification.Position.MIDDLE);
-            } catch (Exception ex) {
-                Notification.show("Error getting admin list: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-    }
-
-    private void configureDialog() {
-        dialog.addSaveListener(event -> {
-            try {
-                if (event.getStudyGroup().getId() == null) {
-                    service.addGroup(event.getStudyGroup());
-                } else {
-                    service.updateGroup(event.getStudyGroup());
-                }
-                updateList();
-                dialog.close();
-                Notification.show("Group saved successfully", 3000, Notification.Position.MIDDLE);
-            } catch (Exception e) {
-                Notification.show("Error: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
-            }
-        });
-        dialog.addCloseListener(event -> dialog.close());
-    }
-
     private void updateList() {
         try {
-            List<StudyGroup> groups = service.filterGroups(filterText.getValue());
+            List<StudyGroup> groups = service.filterGroups(toolbarComponent.getFilterText().getValue());
             grid.setItems(groups);
-            updateChart(groups);
+            distributionChartComponent.updateChart(groups);
         } catch (Exception e) {
             Notification.show("Error updating list: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
         }
     }
 
-    private void updateChart(List<StudyGroup> groups) {
-        // Group by form of education
-        Map<FormOfEducation, Long> distribution = groups.stream()
-            .collect(Collectors.groupingBy(
-                StudyGroup::getFormOfEducation,
-                Collectors.counting()
-            ));
-
-        // Clear previous chart
-        distributionChart.removeAll();
-
-        // Add title
-        H1 chartTitle = new H1(i18NProvider.getTranslation("chart.title", getCurrentLocale()));
-        chartTitle.getStyle()
-            .set("font-size", "1.2rem")
-            .set("margin", "0")
-            .set("text-align", "center");
-        distributionChart.add(chartTitle);
-
-        // Create chart container
-        Div chartContainer = new Div();
-        chartContainer.getStyle()
-            .set("display", "flex")
-            .set("flex-direction", "column")
-            .set("gap", "1rem")
-            .set("padding", "1rem")
-            .set("background", "var(--lumo-base-color)")
-            .set("border-radius", "4px")
-            .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
-
-        // Calculate total for percentages
-        long total = distribution.values().stream().mapToLong(Long::longValue).sum();
-
-        // Create chart items
-        for (Map.Entry<FormOfEducation, Long> entry : distribution.entrySet()) {
-            Div chartItem = new Div();
-            chartItem.getStyle()
-                .set("display", "flex")
-                .set("flex-direction", "column")
-                .set("gap", "0.5rem")
-                .set("padding", "1rem")
-                .set("border-radius", "4px")
-                .set("background", "var(--lumo-contrast-5pct)");
-
-            // Header with color indicator and label
-            Div header = new Div();
-            header.getStyle()
-                .set("display", "flex")
-                .set("align-items", "center")
-                .set("gap", "0.5rem");
-
-            // Color indicator
-            Div colorIndicator = new Div();
-            colorIndicator.getStyle()
-                .set("width", "1rem")
-                .set("height", "1rem")
-                .set("border-radius", "50%")
-                .set("background", getColorForForm(entry.getKey()));
-            header.add(colorIndicator);
-
-            // Label
-            Span label = new Span(entry.getKey().toString());
-            label.getStyle()
-                .set("font-weight", "bold");
-            header.add(label);
-
-            // Progress bar
-            double percentage = total > 0 ? (entry.getValue() * 100.0) / total : 0;
-            Div progressBar = new Div();
-            progressBar.getStyle()
-                .set("width", "100%")
-                .set("height", "1.5rem")
-                .set("background", "var(--lumo-contrast-10pct)")
-                .set("border-radius", "0.75rem")
-                .set("overflow", "hidden");
-
-            Div progress = new Div();
-            progress.getStyle()
-                .set("width", percentage + "%")
-                .set("height", "100%")
-                .set("background", getColorForForm(entry.getKey()))
-                .set("transition", "width 0.3s ease-in-out");
-            progressBar.add(progress);
-
-            // Value and percentage
-            Div valueInfo = new Div();
-            valueInfo.getStyle()
-                .set("display", "flex")
-                .set("justify-content", "space-between")
-                .set("font-size", "0.875rem")
-                .set("color", "var(--lumo-secondary-text-color)");
-            valueInfo.setText(String.format("%d (%.1f%%)", entry.getValue(), percentage));
-
-            chartItem.add(header, progressBar, valueInfo);
-            chartContainer.add(chartItem);
-        }
-
-        distributionChart.add(chartContainer);
-    }
-
-    private String getColorForForm(FormOfEducation form) {
-        switch (form) {
-            case DISTANCE_EDUCATION:
-                return "#FF6B6B";
-            case FULL_TIME_EDUCATION:
-                return "#4ECDC4";
-            case EVENING_CLASSES:
-                return "#FFD93D";
-            default:
-                return "#95A5A6";
-        }
-    }
-
     private void showGroupDetails(StudyGroup group) {
-        Div details = new Div();
-        details.getStyle()
-            .set("position", "fixed")
-            .set("top", "50%")
-            .set("left", "50%")
-            .set("transform", "translate(-50%, -50%)")
-            .set("background", "white")
-            .set("padding", "20px")
-            .set("border-radius", "8px")
-            .set("box-shadow", "0 2px 10px rgba(0,0,0,0.1)")
-            .set("z-index", "1000")
-            .set("min-width", "300px");
-
-        // Create content with translations
-        details.add(new H1(i18NProvider.getTranslation("details.title", getCurrentLocale())));
-        details.add(new Div(i18NProvider.getTranslation("details.id", getCurrentLocale()) + ": " + group.getId()));
-        details.add(new Div(i18NProvider.getTranslation("details.name", getCurrentLocale()) + ": " + group.getName()));
-        details.add(new Div(i18NProvider.getTranslation("details.studentsCount", getCurrentLocale()) + ": " + group.getStudentsCount()));
-        details.add(new Div(i18NProvider.getTranslation("details.expelledStudents", getCurrentLocale()) + ": " + group.getExpelledStudents()));
-        details.add(new Div(i18NProvider.getTranslation("details.transferredStudents", getCurrentLocale()) + ": " + group.getTransferredStudents()));
-        details.add(new Div(i18NProvider.getTranslation("details.formOfEducation", getCurrentLocale()) + ": " + group.getFormOfEducation()));
-        details.add(new Div(i18NProvider.getTranslation("details.coordinates", getCurrentLocale()) + ": X=" + group.getCoordinates().getX() + ", Y=" + group.getCoordinates().getY()));
-        details.add(new Div(i18NProvider.getTranslation("details.creationDate", getCurrentLocale()) + ": " + 
-            group.getCreationDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", getCurrentLocale()))));
-        
-        if (group.getGroupAdmin() != null) {
-            Person admin = group.getGroupAdmin();
-            details.add(new Div(i18NProvider.getTranslation("details.groupAdmin", getCurrentLocale()) + ":"));
-            details.add(new Div("  " + i18NProvider.getTranslation("details.adminName", getCurrentLocale()) + ": " + admin.getName()));
-            details.add(new Div("  " + i18NProvider.getTranslation("details.eyeColor", getCurrentLocale()) + ": " + admin.getEyeColor()));
-            if (admin.getLocation() != null) {
-                String locationText = String.format("%s: X=%.2f, Y=%.2f, Z=%.2f",
-                    i18NProvider.getTranslation("details.location", getCurrentLocale()),
-                    admin.getLocation().getX(),
-                    admin.getLocation().getY(),
-                    admin.getLocation().getZ());
-                details.add(new Div("  " + locationText));
-            }
-        }
-
         Div overlay = new Div();
         overlay.getStyle()
             .set("position", "fixed")
@@ -663,21 +411,11 @@ public class MainView extends VerticalLayout {
             .set("background", "rgba(0,0,0,0.5)")
             .set("z-index", "999");
 
-        overlay.addClickListener(e -> {
-            overlay.removeFromParent();
-            details.removeFromParent();
-        });
-
-        Button closeButton = new Button(i18NProvider.getTranslation("details.close", getCurrentLocale()));
-        closeButton.addClickListener(e -> {
-            overlay.removeFromParent();
-            details.removeFromParent();
-        });
-        details.add(closeButton);
+        GroupDetailsComponent details = new GroupDetailsComponent(i18NProvider, group);
+        overlay.add(details);
 
         getUI().ifPresent(ui -> {
             ui.add(overlay);
-            ui.add(details);
         });
     }
 
