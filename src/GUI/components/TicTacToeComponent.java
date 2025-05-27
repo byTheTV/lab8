@@ -80,55 +80,67 @@ public class TicTacToeComponent extends VerticalLayout {
     private void makeComputerMove() {
         if (gameOver) return;
 
-        // Try to find winning move
+        int bestScore = Integer.MIN_VALUE;
+        int moveRow = -1;
+        int moveCol = -1;
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
                 if (buttons[i][j].getText().isEmpty()) {
                     buttons[i][j].setText("O");
-                    if (checkWin("O")) {
-                        buttons[i][j].getStyle().set("color", "red");
-                        showGameOver("Computer won!");
-                        return;
-                    }
+                    int score = minimax(0, false);
                     buttons[i][j].setText("");
+                    if (score > bestScore) {
+                        bestScore = score;
+                        moveRow = i;
+                        moveCol = j;
+                    }
                 }
             }
         }
+        if (moveRow != -1 && moveCol != -1) {
+            buttons[moveRow][moveCol].setText("O");
+            buttons[moveRow][moveCol].getStyle().set("color", "red");
+            if (checkWin("O")) {
+                showGameOver("Computer won!");
+            } else if (isBoardFull()) {
+                showGameOver("It's a draw!");
+            }
+        }
+        isPlayerTurn = true;
+    }
 
-        // Try to block player's winning move
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (buttons[i][j].getText().isEmpty()) {
-                    buttons[i][j].setText("X");
-                    if (checkWin("X")) {
+    // Минимакс для непобедимого компьютера
+    private int minimax(int depth, boolean isMaximizing) {
+        if (checkWin("O")) return 10 - depth;
+        if (checkWin("X")) return depth - 10;
+        if (isBoardFull()) return 0;
+
+        if (isMaximizing) {
+            int bestScore = Integer.MIN_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (buttons[i][j].getText().isEmpty()) {
                         buttons[i][j].setText("O");
-                        buttons[i][j].getStyle().set("color", "red");
-                        isPlayerTurn = true;
-                        if (checkWin("O")) {
-                            showGameOver("Computer won!");
-                        }
-                        return;
+                        int score = minimax(depth + 1, false);
+                        buttons[i][j].setText("");
+                        bestScore = Math.max(score, bestScore);
                     }
-                    buttons[i][j].setText("");
                 }
             }
-        }
-
-        // Make random move
-        while (true) {
-            int row = random.nextInt(3);
-            int col = random.nextInt(3);
-            if (buttons[row][col].getText().isEmpty()) {
-                buttons[row][col].setText("O");
-                buttons[row][col].getStyle().set("color", "red");
-                if (checkWin("O")) {
-                    showGameOver("Computer won!");
-                } else if (isBoardFull()) {
-                    showGameOver("It's a draw!");
+            return bestScore;
+        } else {
+            int bestScore = Integer.MAX_VALUE;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (buttons[i][j].getText().isEmpty()) {
+                        buttons[i][j].setText("X");
+                        int score = minimax(depth + 1, true);
+                        buttons[i][j].setText("");
+                        bestScore = Math.min(score, bestScore);
+                    }
                 }
-                isPlayerTurn = true;
-                break;
             }
+            return bestScore;
         }
     }
 
