@@ -209,4 +209,82 @@ public class StudyGroupService {
     public Integer getUserId() {
         return userId;
     }
+
+    public String getInfo() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.InfoRequest request = new Common.requests.InfoRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.InfoResponse response = (Common.responses.InfoResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.toString();
+        });
+    }
+
+    public StudyGroup getHead() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.HeadRequest request = new Common.requests.HeadRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.HeadResponse response = (Common.responses.HeadResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.getStudyGroup();
+        });
+    }
+
+    public StudyGroup removeHead() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.RemoveHeadRequest request = new Common.requests.RemoveHeadRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.RemoveHeadResponse response = (Common.responses.RemoveHeadResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.getStudyGroup();
+        });
+    }
+
+    public double getAverageOfTransferredStudents() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.AverageOfTransferredStudentsRequest request = new Common.requests.AverageOfTransferredStudentsRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.AverageOfTransferredStudentsResponse response = (Common.responses.AverageOfTransferredStudentsResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.getAverage();
+        });
+    }
+
+    public String getGroupCountingByFormOfEducation() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.GroupCountingByFormOfEducationRequest request = new Common.requests.GroupCountingByFormOfEducationRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.GroupCountingByFormOfEducationResponse response = (Common.responses.GroupCountingByFormOfEducationResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.toString();
+        });
+    }
+
+    public String getPrintFieldAscendingGroupAdmin() throws Exception {
+        return executeWithRetry(() -> {
+            Common.requests.PrintFieldAscendingGroupAdminRequest request = new Common.requests.PrintFieldAscendingGroupAdminRequest(login, password);
+            request.setUid(uid);
+            client.sendRequest(request);
+            Common.responses.PrintFieldAscendingGroupAdminResponse response = (Common.responses.PrintFieldAscendingGroupAdminResponse) client.receiveResponse();
+            if (response.getError() != null) {
+                throw new Exception("Server error: " + response.getError());
+            }
+            return response.toString();
+        });
+    }
 } 

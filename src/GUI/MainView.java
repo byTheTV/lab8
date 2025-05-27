@@ -4,29 +4,28 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
+import com.vaadin.flow.i18n.I18NProvider;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.data.renderer.ComponentRenderer;
-import com.vaadin.flow.i18n.I18NProvider;
-import com.vaadin.flow.component.UI;
 
 import Client.network.TCPClient;
-import Common.models.Color;
 import Common.models.Coordinates;
+import Common.models.FormOfEducation;
 import Common.models.Location;
 import Common.models.Person;
 import Common.models.StudyGroup;
-import Common.models.FormOfEducation;
 
 @Route("main")
 public class MainView extends VerticalLayout {
@@ -36,6 +35,13 @@ public class MainView extends VerticalLayout {
     private final Button editButton = new Button();
     private final Button removeButton = new Button();
     private final Button clearButton = new Button();
+    private final Button infoButton = new Button();
+    private final Button headButton = new Button();
+    private final Button removeHeadButton = new Button();
+    private final Button averageTransferredButton = new Button();
+    private final Button countByFormButton = new Button();
+    private final Button printAdminAscButton = new Button();
+    private final Button logoutButton = new Button();
     
     private StudyGroupService service;
     private StudyGroupDialog dialog;
@@ -75,16 +81,15 @@ public class MainView extends VerticalLayout {
             HorizontalLayout header = new HorizontalLayout();
             header.setWidthFull();
             header.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            header.setAlignItems(Alignment.CENTER);
             
             // Add user info
             H1 userInfo = new H1(i18NProvider.getTranslation("main.currentUser", getCurrentLocale(), login));
             userInfo.getStyle().set("margin", "0");
             header.add(userInfo);
             
-            // Add language switcher
-            header.add(languageSwitcher);
-            
-            Button logoutButton = new Button(i18NProvider.getTranslation("main.logout", getCurrentLocale()));
+            // Add language switcher and logout button in a group
+            logoutButton.setText(i18NProvider.getTranslation("main.logout", getCurrentLocale()));
             logoutButton.addClickListener(e -> {
                 if (service != null) {
                     service.close();
@@ -100,17 +105,80 @@ public class MainView extends VerticalLayout {
                 getUI().ifPresent(ui -> ui.navigate(""));
             });
             
-            header.add(logoutButton);
+            HorizontalLayout rightControls = new HorizontalLayout(languageSwitcher, logoutButton);
+            rightControls.setSpacing(true);
+            header.add(rightControls);
 
-            // Create toolbar with filter and buttons
-            HorizontalLayout toolbar = new HorizontalLayout(filterText, addButton, editButton, removeButton, clearButton);
-            toolbar.setWidthFull();
-            toolbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            // Create main toolbar with filter and operations
+            HorizontalLayout mainToolbar = new HorizontalLayout();
+            mainToolbar.setWidthFull();
+            mainToolbar.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            mainToolbar.setAlignItems(Alignment.CENTER);
+            mainToolbar.getStyle()
+                .set("background", "var(--lumo-base-color)")
+                .set("border-radius", "4px")
+                .set("padding", "0.5rem")
+                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+            
+            // Left side - filter
+            filterText.getStyle()
+                .set("min-width", "300px")
+                .set("margin-right", "1rem");
+            mainToolbar.add(filterText);
+            
+            // Right side - operations
+            HorizontalLayout operations = new HorizontalLayout(addButton, editButton, removeButton, clearButton);
+            operations.setSpacing(true);
+            mainToolbar.add(operations);
 
-            // Add components to layout
-            add(header, new H1(i18NProvider.getTranslation("main.title", getCurrentLocale())), toolbar, grid);
+            // Create command buttons in a card-like container
+            Div commandCard = new Div();
+            commandCard.getStyle()
+                .set("background", "var(--lumo-base-color)")
+                .set("border-radius", "4px")
+                .set("padding", "1rem")
+                .set("margin", "1rem 0")
+                .set("box-shadow", "0 2px 4px rgba(0,0,0,0.1)");
+
+            // Group commands by functionality
+            HorizontalLayout commandGroups = new HorizontalLayout();
+            commandGroups.setWidthFull();
+            commandGroups.setSpacing(true);
+            commandGroups.setJustifyContentMode(JustifyContentMode.BETWEEN);
+
+            // Collection info commands
+            VerticalLayout infoCommands = new VerticalLayout();
+            infoCommands.setSpacing(true);
+            infoCommands.setPadding(false);
+            infoCommands.add(new Span(i18NProvider.getTranslation("commands.collectionInfo", getCurrentLocale())));
+            infoCommands.add(new HorizontalLayout(infoButton, headButton, removeHeadButton));
+            infoCommands.getStyle().set("min-width", "300px");
+
+            // Statistics commands
+            VerticalLayout statsCommands = new VerticalLayout();
+            statsCommands.setSpacing(true);
+            statsCommands.setPadding(false);
+            statsCommands.add(new Span(i18NProvider.getTranslation("commands.statistics", getCurrentLocale())));
+            statsCommands.add(new HorizontalLayout(averageTransferredButton, countByFormButton, printAdminAscButton));
+            statsCommands.getStyle().set("min-width", "300px");
+
+            commandGroups.add(infoCommands, statsCommands);
+            commandCard.add(commandGroups);
+
+            // Add components to layout with proper spacing
+            add(header);
+            add(new H1(i18NProvider.getTranslation("main.title", getCurrentLocale())));
+            add(mainToolbar);
+            add(commandCard);
+            add(grid);
+            
             setAlignItems(Alignment.CENTER);
             setJustifyContentMode(JustifyContentMode.CENTER);
+            setSpacing(true);
+            setPadding(true);
+            getStyle()
+                .set("background", "var(--lumo-contrast-5pct)")
+                .set("min-height", "100vh");
             
             // Load initial data
             updateList();
@@ -202,6 +270,12 @@ public class MainView extends VerticalLayout {
         editButton.setText(i18NProvider.getTranslation("main.edit", getCurrentLocale()));
         removeButton.setText(i18NProvider.getTranslation("main.remove", getCurrentLocale()));
         clearButton.setText(i18NProvider.getTranslation("main.clearAll", getCurrentLocale()));
+        infoButton.setText(i18NProvider.getTranslation("main.info", getCurrentLocale()));
+        headButton.setText(i18NProvider.getTranslation("main.head", getCurrentLocale()));
+        removeHeadButton.setText(i18NProvider.getTranslation("main.removeHead", getCurrentLocale()));
+        averageTransferredButton.setText(i18NProvider.getTranslation("main.averageTransferred", getCurrentLocale()));
+        countByFormButton.setText(i18NProvider.getTranslation("main.countByForm", getCurrentLocale()));
+        printAdminAscButton.setText(i18NProvider.getTranslation("main.printAdminAsc", getCurrentLocale()));
 
         addButton.addClickListener(e -> {
             StudyGroup newGroup = new StudyGroup();
@@ -270,6 +344,70 @@ public class MainView extends VerticalLayout {
                 Notification.show("All groups cleared successfully", 3000, Notification.Position.MIDDLE);
             } catch (Exception ex) {
                 Notification.show("Error clearing groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        // New command button handlers
+        infoButton.addClickListener(e -> {
+            try {
+                String info = service.getInfo();
+                Notification.show(info, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error getting info: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        headButton.addClickListener(e -> {
+            try {
+                StudyGroup head = service.getHead();
+                if (head != null) {
+                    showGroupDetails(head);
+                } else {
+                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
+                }
+            } catch (Exception ex) {
+                Notification.show("Error getting head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        removeHeadButton.addClickListener(e -> {
+            try {
+                StudyGroup removed = service.removeHead();
+                if (removed != null) {
+                    Notification.show("Removed head element: " + removed.getName(), 3000, Notification.Position.MIDDLE);
+                    updateList();
+                } else {
+                    Notification.show("Collection is empty", 3000, Notification.Position.MIDDLE);
+                }
+            } catch (Exception ex) {
+                Notification.show("Error removing head element: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        averageTransferredButton.addClickListener(e -> {
+            try {
+                double average = service.getAverageOfTransferredStudents();
+                Notification.show("Average of transferred students: " + average, 3000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error calculating average: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        countByFormButton.addClickListener(e -> {
+            try {
+                String counts = service.getGroupCountingByFormOfEducation();
+                Notification.show(counts, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error counting groups: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
+        });
+
+        printAdminAscButton.addClickListener(e -> {
+            try {
+                String admins = service.getPrintFieldAscendingGroupAdmin();
+                Notification.show(admins, 5000, Notification.Position.MIDDLE);
+            } catch (Exception ex) {
+                Notification.show("Error getting admin list: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
             }
         });
     }

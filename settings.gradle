@@ -1,3 +1,3 @@
-rootProject.name = 'lab7'
+rootProject.name = 'lab8'
 include 'client'
 include 'server' 
