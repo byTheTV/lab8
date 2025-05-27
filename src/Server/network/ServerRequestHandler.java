@@ -11,6 +11,7 @@ import Common.models.StudyGroup;
 import Common.models.User;
 import Common.requests.AddRequest;
 import Common.requests.AuthRequest;
+import Common.requests.RegisterRequest;
 import Common.requests.RemoveByIdRequest;
 import Common.requests.RemoveLowerRequest;
 import Common.requests.Request;
@@ -57,7 +58,7 @@ public class ServerRequestHandler implements RequestHandler {
                 System.out.println("[Сервер] Пользователь " + login + " уже подключен. Отключаем старое соединение.");
             }
 
-            User user = authService.authenticateOrRegister(
+            User user = authService.authenticate(
                     login,
                     authRequest.getPassword()
             );
@@ -81,6 +82,36 @@ public class ServerRequestHandler implements RequestHandler {
             return new AuthResponse(
                     AuthResponse.AuthStatus.AUTH_FAILED,
                     "Неверные учетные данные",
+                    null,
+                    null
+            );
+        });
+
+        requestHandlers.put("register", request -> {
+            RegisterRequest registerRequest = (RegisterRequest) request;
+            String login = registerRequest.getLogin();
+            
+            User user = authService.register(
+                    login,
+                    registerRequest.getPassword()
+            );
+
+            if (user != null) {
+                String uid = UUID.randomUUID().toString();
+                userUids.put(login, uid);
+                
+                System.out.println("[Сервер] Успешная регистрация пользователя " + login);
+                
+                return new AuthResponse(
+                        AuthResponse.AuthStatus.AUTH_SUCCESS,
+                        "Успешная регистрация",
+                        user.getId(),
+                        uid
+                );
+            }
+            return new AuthResponse(
+                    AuthResponse.AuthStatus.AUTH_FAILED,
+                    "Ошибка регистрации: логин уже занят",
                     null,
                     null
             );
@@ -228,7 +259,7 @@ public class ServerRequestHandler implements RequestHandler {
 
     @Override
     public Response handleRequest(Request request) {
-        if (!request.getName().equals("auth")) {
+        if (!request.getName().equals("auth") && !request.getName().equals("register")) {
             String login = request.getLogin();
             String storedUid = userUids.get(login);
             

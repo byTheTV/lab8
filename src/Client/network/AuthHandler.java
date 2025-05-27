@@ -15,7 +15,7 @@ public class AuthHandler {
         this.client = client;
     }
 
-    // New method for GUI authentication
+    // Method for GUI authentication
     public User authenticate(String login, String password) {
         try {
             client.sendAuthRequest(login, password);
@@ -32,6 +32,28 @@ public class AuthHandler {
             }
         } catch (IOException | ClassNotFoundException e) {
             System.err.println("Ошибка при аутентификации: " + e.getMessage());
+        }
+
+        return null;
+    }
+
+    // New method for registration
+    public User register(String login, String password) {
+        try {
+            client.sendRegisterRequest(login, password);
+            AuthResponse response = client.receiveAuthResponse();
+
+            if (response.getAuthStatus() == AuthResponse.AuthStatus.AUTH_SUCCESS) {
+                User user = new User();
+                user.setLogin(login);
+                user.setId(response.getUserId());
+                user.setUid(response.getUid());
+                return user;
+            } else {
+                System.err.println("Ошибка регистрации: " + response.getError());
+            }
+        } catch (IOException | ClassNotFoundException e) {
+            System.err.println("Ошибка при регистрации: " + e.getMessage());
         }
 
         return null;

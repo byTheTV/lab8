@@ -65,8 +65,32 @@ public class LoginView extends VerticalLayout {
         });
 
         registerButton.addClickListener(e -> {
-            // TODO: Implement registration view
-            Notification.show("Registration not implemented yet", 3000, Notification.Position.MIDDLE);
+            try {
+                // Create TCP client and auth handler
+                TCPClient client = new TCPClient(InetAddress.getByName("localhost"), 55555);
+                AuthHandler authHandler = new AuthHandler(client);
+                
+                // Attempt registration with provided credentials
+                User user = authHandler.register(username.getValue(), password.getValue());
+                
+                if (user != null) {
+                    // Store client and credentials in session
+                    VaadinSession.getCurrent().setAttribute("tcpClient", client);
+                    VaadinSession.getCurrent().setAttribute("login", username.getValue());
+                    VaadinSession.getCurrent().setAttribute("password", password.getValue());
+                    VaadinSession.getCurrent().setAttribute("userId", user.getId());
+                    VaadinSession.getCurrent().setAttribute("userUid", user.getUid());
+                    
+                    // Successful registration and login
+                    getUI().ifPresent(ui -> ui.navigate("main"));
+                } else {
+                    // Close client if registration failed
+                    client.close();
+                    Notification.show("Registration failed: username already taken", 3000, Notification.Position.MIDDLE);
+                }
+            } catch (Exception ex) {
+                Notification.show("Error: " + ex.getMessage(), 3000, Notification.Position.MIDDLE);
+            }
         });
 
         add(

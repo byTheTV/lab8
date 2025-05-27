@@ -1,21 +1,30 @@
 package Server.services;
 
-import Common.models.User;
-import Server.database.DatabaseManager;
-import java.sql.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import Common.models.User;
+import Server.database.DatabaseManager;
 
 public class AuthService {
 
-    public User authenticateOrRegister(String login, String rawPassword) {
+    public User authenticate(String login, String rawPassword) {
         try {
-            // Попытка аутентификации
+            return authenticateUser(login, rawPassword);
+        } catch (SQLException | NoSuchAlgorithmException e) {
+            System.err.println("Ошибка: " + e.getMessage());
+            return null;
+        }
+    }
 
-            User user = authenticate(login, rawPassword);
-            if (user != null) return user;
-
+    public User register(String login, String rawPassword) {
+        try {
             // Проверка, не занят ли логин
             if (isUsernameTaken(login)) {
                 System.err.println("Логин уже занят: " + login);
@@ -23,8 +32,7 @@ public class AuthService {
             }
 
             // Регистрация
-            return register(login, rawPassword);
-
+            return registerUser(login, rawPassword);
         } catch (SQLException | NoSuchAlgorithmException e) {
             System.err.println("Ошибка: " + e.getMessage());
             return null;
@@ -40,7 +48,7 @@ public class AuthService {
         }
     }
 
-    private User authenticate(String login, String rawPassword)
+    private User authenticateUser(String login, String rawPassword)
             throws SQLException, NoSuchAlgorithmException {
 
         System.out.println("Попытка аутентификации: " + login);
@@ -66,7 +74,7 @@ public class AuthService {
         }
     }
 
-    private User register(String login, String rawPassword)
+    private User registerUser(String login, String rawPassword)
             throws SQLException, NoSuchAlgorithmException {
 
         System.out.println("Регистрация нового пользователя: " + login);
