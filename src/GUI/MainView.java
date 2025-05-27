@@ -13,6 +13,9 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 
 import Client.network.TCPClient;
 import Common.models.Color;
@@ -34,6 +37,7 @@ public class MainView extends VerticalLayout {
     private StudyGroupService service;
     private StudyGroupDialog dialog;
     private TCPClient client;
+    private String currentUserLogin;
 
     public MainView() {
         try {
@@ -50,6 +54,7 @@ public class MainView extends VerticalLayout {
                 return;
             }
             
+            this.currentUserLogin = login;
             this.service = new StudyGroupService(client, login, password, userUid, userId);
             this.dialog = new StudyGroupDialog();
             
@@ -59,10 +64,15 @@ public class MainView extends VerticalLayout {
             configureButtons();
             configureDialog();
             
-            // Create header with logout button
+            // Create header with user info and logout button
             HorizontalLayout header = new HorizontalLayout();
             header.setWidthFull();
-            header.setJustifyContentMode(JustifyContentMode.END);
+            header.setJustifyContentMode(JustifyContentMode.BETWEEN);
+            
+            // Add user info
+            H1 userInfo = new H1("Current user: " + login);
+            userInfo.getStyle().set("margin", "0");
+            header.add(userInfo);
             
             Button logoutButton = new Button("Logout");
             logoutButton.addClickListener(e -> {
@@ -103,27 +113,68 @@ public class MainView extends VerticalLayout {
 
     private void configureGrid() {
         grid.setSizeFull();
-        grid.setColumns("id", "name", "studentsCount", "expelledStudents", "transferredStudents", "formOfEducation");
-        
-        // Add custom columns for complex objects
-        grid.addColumn(group -> group.getCoordinates().getX() + ", " + group.getCoordinates().getY())
-            .setHeader("Coordinates")
-            .setSortable(true);
-            
-        grid.addColumn(group -> group.getCreationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
-            .setHeader("Creation Date")
-            .setSortable(true);
-            
-        grid.addColumn(group -> {
-            Person admin = group.getGroupAdmin();
-            return admin != null ? admin.getName() : "N/A";
-        }).setHeader("Admin Name")
-          .setSortable(true);
 
-        // Enable sorting for all columns
+        // Add click listener to show detailed information
+        grid.addItemClickListener(event -> {
+            StudyGroup group = event.getItem();
+            showGroupDetails(group);
+        });
+
+        // Добавляем генератор классов для стилизации строк
+        grid.setClassNameGenerator(group -> {
+            if (group.getUserId() != null && group.getUserId().equals(service.getUserId())) {
+                return "my-group"; // Класс для групп пользователя
+            } else {
+                return "other-group"; // Класс для групп других пользователей
+            }
+        });
+
+        // Добавляем колонку с улучшенным индикатором (круг)
+        grid.addColumn(new ComponentRenderer<>(group -> {
+            Span indicator = new Span();
+            indicator.getStyle()
+                    .set("display", "inline-block")
+                    .set("width", "15px") // Увеличиваем размер круга
+                    .set("height", "15px")
+                    .set("border-radius", "50%") // Делаем круглым
+                    .set("margin-right", "10px"); // Отступ справа
+
+            if (group.getUserId() != null && group.getUserId().equals(service.getUserId())) {
+                indicator.getStyle()
+                        .set("background-color", "green") // Зеленый для групп пользователя
+                        .set("border", "2px solid darkgreen"); // Граница для выделения
+                indicator.setTitle("Ваша группа"); // Подсказка
+            } else {
+                indicator.getStyle()
+                        .set("background-color", "red") // Красный для других групп
+                        .set("border", "2px solid darkred"); // Граница для выделения
+                indicator.setTitle("Чужая группа"); // Подсказка
+            }
+            return indicator;
+        })).setFlexGrow(0).setWidth("40px"); // Увеличиваем ширину колонки для нового размера круга
+
+        // Основные колонки
+        grid.setColumns("id", "name", "studentsCount", "expelledStudents", "transferredStudents", "formOfEducation");
+
+        // Пользовательские колонки для сложных объектов
+        grid.addColumn(group -> group.getCoordinates().getX() + ", " + group.getCoordinates().getY())
+                .setHeader("Координаты")
+                .setSortable(true);
+
+        grid.addColumn(group -> group.getCreationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+                .setHeader("Дата создания")
+                .setSortable(true);
+
+        grid.addColumn(group -> {
+                    Person admin = group.getGroupAdmin();
+                    return admin != null ? admin.getName() : "Н/Д";
+                }).setHeader("Имя админа")
+                .setSortable(true);
+
+        // Включаем сортировку для всех колонок
         grid.getColumns().forEach(col -> col.setSortable(true));
-        
-        // Enable selection
+
+        // Включаем множественный выбор
         grid.setSelectionMode(Grid.SelectionMode.MULTI);
     }
 
@@ -231,5 +282,69 @@ public class MainView extends VerticalLayout {
         } catch (Exception e) {
             Notification.show("Error updating list: " + e.getMessage(), 3000, Notification.Position.MIDDLE);
         }
+    }
+
+    private void showGroupDetails(StudyGroup group) {
+        Div details = new Div();
+        details.getStyle()
+            .set("position", "fixed")
+            .set("top", "50%")
+            .set("left", "50%")
+            .set("transform", "translate(-50%, -50%)")
+            .set("background", "white")
+            .set("padding", "20px")
+            .set("border-radius", "8px")
+            .set("box-shadow", "0 2px 10px rgba(0,0,0,0.1)")
+            .set("z-index", "1000")
+            .set("min-width", "300px");
+
+        // Create content
+        details.add(new H1("Group Details"));
+        details.add(new Div("ID: " + group.getId()));
+        details.add(new Div("Name: " + group.getName()));
+        details.add(new Div("Students Count: " + group.getStudentsCount()));
+        details.add(new Div("Expelled Students: " + group.getExpelledStudents()));
+        details.add(new Div("Transferred Students: " + group.getTransferredStudents()));
+        details.add(new Div("Form of Education: " + group.getFormOfEducation()));
+        details.add(new Div("Coordinates: X=" + group.getCoordinates().getX() + ", Y=" + group.getCoordinates().getY()));
+        details.add(new Div("Creation Date: " + group.getCreationDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+        
+        if (group.getGroupAdmin() != null) {
+            Person admin = group.getGroupAdmin();
+            details.add(new Div("Group Admin:"));
+            details.add(new Div("  Name: " + admin.getName()));
+            details.add(new Div("  Eye Color: " + admin.getEyeColor()));
+            if (admin.getLocation() != null) {
+                details.add(new Div("  Location: X=" + admin.getLocation().getX() + 
+                    ", Y=" + admin.getLocation().getY() + 
+                    ", Z=" + admin.getLocation().getZ()));
+            }
+        }
+
+        // Add close button
+        Button closeButton = new Button("Close");
+        closeButton.addClickListener(e -> details.removeFromParent());
+        details.add(closeButton);
+
+        // Add overlay
+        Div overlay = new Div();
+        overlay.getStyle()
+            .set("position", "fixed")
+            .set("top", "0")
+            .set("left", "0")
+            .set("right", "0")
+            .set("bottom", "0")
+            .set("background", "rgba(0,0,0,0.5)")
+            .set("z-index", "999");
+
+        overlay.addClickListener(e -> {
+            overlay.removeFromParent();
+            details.removeFromParent();
+        });
+
+        getUI().ifPresent(ui -> {
+            ui.add(overlay);
+            ui.add(details);
+        });
     }
 } 

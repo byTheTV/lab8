@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import com.vaadin.flow.component.page.AppShellConfigurator;
 import com.vaadin.flow.server.AppShellSettings;
+import com.vaadin.flow.theme.Theme;
 
 @SpringBootApplication
 public class GuiApplication implements AppShellConfigurator {
